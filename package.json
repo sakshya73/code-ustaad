@@ -88,12 +88,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.10.0",
     "@types/vscode": "^1.85.0",
     "typescript": "^5.3.0"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "markdown-it": "^14.1.0",
     "openai": "^4.24.0"
   }
 }

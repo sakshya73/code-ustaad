@@ -1,6 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import MarkdownIt from "markdown-it";
 import OpenAI from "openai";
 import * as vscode from "vscode";
+
+const md = new MarkdownIt({
+    html: false,
+    breaks: true,
+    linkify: true,
+});
 
 const USTAAD_SYSTEM_PROMPT = `You are "Code Ustaad" - a wise, experienced Indian mentor (Ustaad) who teaches programming concepts with warmth and wisdom. You speak in Hinglish (a mix of Hindi and English), using common Hindi phrases naturally mixed with technical English terms.
 
@@ -20,6 +27,9 @@ When explaining code:
 5. End with encouragement and maybe a small tip or "guru mantra"
 
 Remember: You're not just explaining code, you're mentoring a student with the wisdom of years of experience, like a caring Ustaad in a traditional guru-shishya relationship.`;
+
+const MIN_SELECTION_LENGTH = 20;
+const CONTEXT_LINES = 10;
 
 let currentPanel: vscode.WebviewPanel | undefined;
 
@@ -46,6 +56,30 @@ export function activate(context: vscode.ExtensionContext) {
                     "Beta, pehle code select karo jo samajhna hai!",
                 );
                 return;
+            }
+
+            // Get surrounding context for small selections
+            let codeToExplain = selectedText;
+            let contextInfo = "";
+
+            if (selectedText.length < MIN_SELECTION_LENGTH) {
+                const startLine = Math.max(
+                    0,
+                    selection.start.line - CONTEXT_LINES,
+                );
+                const endLine = Math.min(
+                    editor.document.lineCount - 1,
+                    selection.end.line + CONTEXT_LINES,
+                );
+                const contextRange = new vscode.Range(
+                    startLine,
+                    0,
+                    endLine,
+                    editor.document.lineAt(endLine).text.length,
+                );
+                const surroundingCode = editor.document.getText(contextRange);
+                codeToExplain = surroundingCode;
+                contextInfo = `\n\nNote: The user selected "${selectedText}" (highlighted below). Please focus your explanation on this specific part, but use the surrounding context to provide accurate information.\n\nSelected text: "${selectedText}"`;
             }
 
             const config = vscode.workspace.getConfiguration("codeUstaad");
@@ -112,6 +146,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             try {
                 let explanation: string;
+                const userPrompt = `Please explain this ${languageId} code:\n\n\`\`\`${languageId}\n${codeToExplain}\n\`\`\`${contextInfo}`;
 
                 if (provider === "openai") {
                     const openai = new OpenAI({ apiKey });
@@ -119,10 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
                         model: openaiModel,
                         messages: [
                             { role: "system", content: USTAAD_SYSTEM_PROMPT },
-                            {
-                                role: "user",
-                                content: `Please explain this ${languageId} code:\n\n\`\`\`${languageId}\n${selectedText}\n\`\`\``,
-                            },
+                            { role: "user", content: userPrompt },
                         ],
                         temperature: 0.7,
                         max_tokens: 2000,
@@ -136,8 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
                         model: geminiModel,
                         systemInstruction: USTAAD_SYSTEM_PROMPT,
                     });
-                    const prompt = `Please explain this ${languageId} code:\n\n\`\`\`${languageId}\n${selectedText}\n\`\`\``;
-                    const result = await model.generateContent(prompt);
+                    const result = await model.generateContent(userPrompt);
                     explanation =
                         result.response.text() ||
                         "Arey beta, kuch gadbad ho gayi!";
@@ -150,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
                     false,
                 );
             } catch (error: any) {
-                const errorMessage = error?.message || "Unknown error";
+                const errorMessage = handleApiError(error, provider);
                 vscode.window.showErrorMessage(
                     `Ustaad ko problem aa gayi: ${errorMessage}`,
                 );
@@ -167,6 +198,54 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable);
 }
 
+function handleApiError(error: any, provider: string): string {
+    const statusCode = error?.status || error?.response?.status;
+    const errorMessage = error?.message || "Unknown error";
+
+    // Handle rate limiting (429)
+    if (
+        statusCode === 429 ||
+        errorMessage.includes("429") ||
+        errorMessage.toLowerCase().includes("rate limit") ||
+        errorMessage.toLowerCase().includes("quota")
+    ) {
+        if (provider === "gemini") {
+            return "Gemini ka quota khatam ho gaya hai, beta! Thoda wait karo (1-2 minute) ya phir apna API plan check karo: https://aistudio.google.com/apikey";
+        }
+        return "OpenAI ka rate limit hit ho gaya hai, beta! Thoda wait karo (1 minute) aur phir try karo. Agar baar baar ho raha hai toh apna API usage check karo: https://platform.openai.com/usage";
+    }
+
+    // Handle authentication errors (401)
+    if (
+        statusCode === 401 ||
+        errorMessage.includes("401") ||
+        errorMessage.toLowerCase().includes("invalid api key") ||
+        errorMessage.toLowerCase().includes("authentication")
+    ) {
+        return "API key galat lag rahi hai, beta! Settings mein jaake sahi key daalo.";
+    }
+
+    // Handle not found errors (404)
+    if (
+        statusCode === 404 ||
+        errorMessage.includes("404") ||
+        errorMessage.toLowerCase().includes("not found")
+    ) {
+        return `Model nahi mila, beta! Settings mein jaake sahi model select karo. Shayad "${provider === "gemini" ? "gemini-1.5-pro" : "gpt-4o-mini"}" try karo.`;
+    }
+
+    // Handle network errors
+    if (
+        errorMessage.toLowerCase().includes("network") ||
+        errorMessage.toLowerCase().includes("fetch") ||
+        errorMessage.toLowerCase().includes("econnrefused")
+    ) {
+        return "Internet connection mein problem hai, beta! Apna network check karo aur phir try karo.";
+    }
+
+    return errorMessage;
+}
+
 function getWebviewContent(
     explanation: string,
     code: string,
@@ -174,13 +253,15 @@ function getWebviewContent(
     isLoading: boolean,
 ): string {
     const escapedCode = escapeHtml(code);
-    const escapedExplanation = escapeHtml(explanation);
+    // Render markdown for explanation instead of escaping
+    const renderedExplanation = isLoading ? "" : md.render(explanation);
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:;">
     <title>Code Ustaad</title>
     <style>
         * {
@@ -252,8 +333,63 @@ function getWebviewContent(
             border-left: 4px solid var(--vscode-textLink-foreground, #3794ff);
             border-radius: 0 6px 6px 0;
             padding: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        }
+
+        /* Markdown styling */
+        .explanation h1, .explanation h2, .explanation h3, .explanation h4 {
+            color: var(--vscode-textLink-foreground, #3794ff);
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .explanation h1 { font-size: 1.5em; }
+        .explanation h2 { font-size: 1.3em; }
+        .explanation h3 { font-size: 1.1em; }
+
+        .explanation p {
+            margin-bottom: 12px;
+        }
+
+        .explanation code {
+            background-color: var(--vscode-textCodeBlock-background, #2d2d2d);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--vscode-editor-font-family, 'Consolas', 'Courier New', monospace);
+            font-size: 0.9em;
+        }
+
+        .explanation pre {
+            background-color: var(--vscode-textCodeBlock-background, #2d2d2d);
+            border: 1px solid var(--vscode-panel-border, #454545);
+            border-radius: 6px;
+            padding: 12px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .explanation pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .explanation ul, .explanation ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+
+        .explanation li {
+            margin-bottom: 6px;
+        }
+
+        .explanation strong {
+            color: var(--vscode-textPreformat-foreground, #ce9178);
+        }
+
+        .explanation blockquote {
+            border-left: 3px solid var(--vscode-textLink-foreground, #3794ff);
+            padding-left: 12px;
+            margin: 12px 0;
+            opacity: 0.9;
         }
 
         .loading {
@@ -319,7 +455,7 @@ function getWebviewContent(
             </div>
         `
                 : `
-            <div class="explanation">${escapedExplanation}</div>
+            <div class="explanation">${renderedExplanation}</div>
         `
         }
     </div>
