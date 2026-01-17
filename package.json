@@ -74,6 +74,28 @@
             "gemini-1.5-pro",
             "gemini-1.0-pro"
           ]
+        },
+        "codeUstaad.personaIntensity": {
+          "type": "string",
+          "default": "balanced",
+          "description": "Ustaad's teaching style",
+          "enum": [
+            "strict",
+            "balanced",
+            "funny"
+          ],
+          "enumDescriptions": [
+            "Strict mentor - focus on best practices and warnings",
+            "Balanced - mix of teaching and encouragement",
+            "Funny - more jokes, Bollywood references, and casual tone"
+          ]
+        },
+        "codeUstaad.maxHistoryItems": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Maximum number of explanations to keep in history"
         }
       }
     }
