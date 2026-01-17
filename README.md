@@ -9,8 +9,11 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 ## ✨ Features
 
 * **Hinglish Explanations:** Get explanations that feel like a chat with a senior dev. ("*Dekho beta, ye loop basic filtering kar raha hai...*")
+* **Streaming Responses:** See text appear in real-time, character by character - no more waiting for the full response!
 * **Multiple AI Providers:** Choose between OpenAI (GPT) or Google Gemini - use whichever you have access to.
-* **Context Aware:** Understands functions, classes, and logic blocks in any programming language.
+* **History Panel:** Compare multiple explanations side-by-side. Your history is saved across sessions.
+* **Persona Modes:** Choose Ustaad's teaching style - Strict, Balanced, or Funny (with Bollywood references!)
+* **Smart Context:** Select even a single word - Ustaad grabs surrounding code for accurate explanations.
 * **Privacy First:** Your code is sent directly to the AI provider using *your* key. No middleman servers.
 * **Zero Cost:** Free to use (you only pay for your API usage).
 * **Works in Cursor:** Fully compatible with Cursor AI code editor.
@@ -32,6 +35,16 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 | `codeUstaad.openaiApiKey` | Your OpenAI API Key (starts with `sk-...`) |
 | `codeUstaad.geminiModel` | Gemini model to use (default: `gemini-2.0-flash`) |
 | `codeUstaad.openaiModel` | OpenAI model to use (default: `gpt-4o-mini`) |
+| `codeUstaad.personaIntensity` | Ustaad's teaching style: `strict`, `balanced`, or `funny` (default: `balanced`) |
+| `codeUstaad.maxHistoryItems` | Number of explanations to keep in history (default: `10`, max: `50`) |
+
+### Persona Modes
+
+| Mode | Description |
+| :--- | :--- |
+| **Strict** | Focus on best practices, warnings, and correctness. Less jokes, more discipline. |
+| **Balanced** | Warm teaching with Indian analogies and encouragement. (Default) |
+| **Funny** | Bollywood dialogues, cricket commentary, and memes! *"Mogambo khush hua!"* |
 
 ## 🛠️ Installation for Developers (Local Setup)
 
