@@ -1,10 +1,10 @@
 {
   "name": "code-ustaad",
-  "displayName": "Code Ustaad 👨‍🏫",
+  "displayName": "Code Ustaad AI",
   "description": "Your AI coding mentor. Explains complex code in Hinglish (Hindi + English).",
-  "version": "0.0.1",
-  "publisher": "code-ustaad", 
-  "icon": "icon.png", 
+  "version": "1.0.1",
+  "publisher": "code-ustaad",
+  "icon": "icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
   "categories": [
     "Programming Languages",
     "Education",
-    "Machine Learning" 
+    "Machine Learning"
   ],
   "keywords": [
     "hinglish",
@@ -36,7 +36,7 @@
     "commands": [
       {
         "command": "code-ustaad.askUstaad",
-        "title": "Ask Ustaad (Explain in Hinglish)" 
+        "title": "Ask Ustaad (Explain in Hinglish)"
       },
       {
         "command": "code-ustaad.setApiKey",

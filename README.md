@@ -1,9 +1,5 @@
 # 👨‍🏫 Code Ustaad (Code उस्ताद)
 
-[![Version](https://vsode.com/api/v/sakshya-arora.code-ustaad/version.svg)](https://marketplace.visualstudio.com/items?itemName=sakshya-arora.code-ustaad)
-[![Installs](https://vsode.com/api/i/sakshya-arora.code-ustaad/installs.svg)](https://marketplace.visualstudio.com/items?itemName=sakshya-arora.code-ustaad)
-[![License](https://img.shields.io/github/license/sakshya73/code-ustaad)](LICENSE)
-
 **Complex Code? Tension mat le, Ustaad hai na.**
 
 ![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/main/assets/demo.gif?raw=true)
