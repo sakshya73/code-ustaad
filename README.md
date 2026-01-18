@@ -14,6 +14,8 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 * **History Panel:** Compare multiple explanations side-by-side. Your history is saved across sessions.
 * **Persona Modes:** Choose Ustaad's teaching style - Strict, Balanced, or Funny (with Bollywood references!)
 * **Smart Context:** Select even a single word - Ustaad grabs surrounding code for accurate explanations.
+* **Keyboard Shortcut:** `Cmd+Shift+U` (Mac) / `Ctrl+Shift+U` (Windows/Linux) for instant access.
+* **Secure Key Storage:** API keys stored securely using VS Code's encrypted SecretStorage.
 * **Privacy First:** Your code is sent directly to the AI provider using *your* key. No middleman servers.
 * **Zero Cost:** Free to use (you only pay for your API usage).
 * **Works in Cursor:** Fully compatible with Cursor AI code editor.
@@ -21,22 +23,39 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 ## 🚀 How to Use (Kaise Use Karein)
 
 1. **Install** the extension from the VS Code Marketplace (or load locally).
-2. **Add Key:** Open Settings (`Cmd + ,` / `Ctrl + ,`), search for `Code Ustaad`, and enter your API Key.
+2. **Set API Key:** Run command `Code Ustaad: Set API Key` (Cmd+Shift+P → type "Set API Key").
 3. **Select Code:** Highlight any confusing function or logic block.
-4. **Ask Ustaad:** Right-click and select **"Ask Ustaad"**.
-5. **Learn:** Read the explanation in the side panel.
+4. **Ask Ustaad:**
+   - **Keyboard:** `Cmd+Shift+U` (Mac) / `Ctrl+Shift+U` (Windows/Linux)
+   - **Right-click:** Select **"Ask Ustaad"** from context menu
+5. **Learn:** Read the streaming explanation in the side panel!
 
 ## ⚙️ Configuration
+
+### Commands
+
+| Command | Description |
+| :--- | :--- |
+| `Code Ustaad: Set API Key` | Securely store your API key (encrypted) |
+| `Code Ustaad: Clear API Key` | Remove stored API key |
+| `Ask Ustaad` | Explain selected code (also via right-click or keyboard shortcut) |
+
+### Settings
 
 | Setting | Description |
 | :--- | :--- |
 | `codeUstaad.provider` | Choose AI provider: `openai` or `gemini` (default: `gemini`) |
-| `codeUstaad.geminiApiKey` | Your Google Gemini API Key. Get one at [aistudio.google.com](https://aistudio.google.com/apikey) |
-| `codeUstaad.openaiApiKey` | Your OpenAI API Key (starts with `sk-...`) |
 | `codeUstaad.geminiModel` | Gemini model to use (default: `gemini-2.0-flash`) |
 | `codeUstaad.openaiModel` | OpenAI model to use (default: `gpt-4o-mini`) |
 | `codeUstaad.personaIntensity` | Ustaad's teaching style: `strict`, `balanced`, or `funny` (default: `balanced`) |
 | `codeUstaad.maxHistoryItems` | Number of explanations to keep in history (default: `10`, max: `50`) |
+
+### Keyboard Shortcuts
+
+| Shortcut | Platform | Action |
+| :--- | :--- | :--- |
+| `Cmd+Shift+U` | Mac | Ask Ustaad |
+| `Ctrl+Shift+U` | Windows/Linux | Ask Ustaad |
 
 ### Persona Modes
 
