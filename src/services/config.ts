@@ -13,25 +13,31 @@ export class ConfigService {
     private static readonly SECTION = "codeUstaad";
 
     static get(): AppConfig {
-        const config = vscode.workspace.getConfiguration(this.SECTION);
+        const config = vscode.workspace.getConfiguration(ConfigService.SECTION);
         return {
             provider: config.get<ProviderType>("provider") || "gemini",
             openaiModel: config.get<string>("openaiModel") || "gpt-4o-mini",
-            geminiModel: config.get<string>("geminiModel") || "gemini-2.0-flash",
+            geminiModel:
+                config.get<string>("geminiModel") || "gemini-2.5-flash",
             personaIntensity:
-                config.get<"strict" | "balanced" | "funny">("personaIntensity") ||
-                "balanced",
+                config.get<"strict" | "balanced" | "funny">(
+                    "personaIntensity",
+                ) || "balanced",
             maxHistoryItems: config.get<number>("maxHistoryItems") || 10,
         };
     }
 
     static async setProvider(provider: ProviderType): Promise<void> {
-        const config = vscode.workspace.getConfiguration(this.SECTION);
-        await config.update("provider", provider, vscode.ConfigurationTarget.Global);
+        const config = vscode.workspace.getConfiguration(ConfigService.SECTION);
+        await config.update(
+            "provider",
+            provider,
+            vscode.ConfigurationTarget.Global,
+        );
     }
 
     static getModel(provider: ProviderType): string {
-        const config = this.get();
+        const config = ConfigService.get();
         return provider === "openai" ? config.openaiModel : config.geminiModel;
     }
 }

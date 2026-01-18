@@ -3,7 +3,7 @@
   "displayName": "Code Ustaad 👨‍🏫",
   "description": "Your AI coding mentor. Explains complex code in Hinglish (Hindi + English).",
   "version": "0.0.1",
-  "publisher": "YOUR-MARKETPLACE-ID", 
+  "publisher": "code-ustaad", 
   "icon": "icon.png", 
   "license": "MIT",
   "repository": {
@@ -92,11 +92,11 @@
         },
         "codeUstaad.geminiModel": {
           "type": "string",
-          "default": "gemini-1.5-flash", 
-          "description": "Gemini model to use. 1.5-flash is best for speed and free tier.",
+          "default": "gemini-2.5-flash",
+          "description": "Gemini model to use. 'gemini-2.5-flash' is the current recommended model for speed and the free tier.",
           "enum": [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
             "gemini-2.0-flash"
           ]
         },

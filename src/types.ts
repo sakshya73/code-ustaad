@@ -1,5 +1,3 @@
-import * as vscode from "vscode";
-
 export interface HistoryItem {
     id: string;
     code: string;
@@ -43,9 +41,4 @@ export interface AppConfig {
     geminiModel: string;
     personaIntensity: "strict" | "balanced" | "funny";
     maxHistoryItems: number;
-}
-
-export interface AppContext {
-    extensionContext: vscode.ExtensionContext;
-    panel?: vscode.WebviewPanel;
 }

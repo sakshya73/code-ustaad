@@ -1,13 +1,19 @@
 import * as vscode from "vscode";
 import {
+    getDisplayLanguage,
     LARGE_CODE_INSTRUCTION,
     PERSONA_PROMPTS,
-    getDisplayLanguage,
 } from "../prompts";
 import { createProvider } from "../providers";
 import { ConfigService, HistoryService, SecretsService } from "../services";
 import type { HistoryItem } from "../types";
-import { countLines, escapeHtml, generateId, renderMarkdown } from "../utils/helpers";
+import {
+    checkConnectivity,
+    countLines,
+    escapeHtml,
+    generateId,
+    renderMarkdown,
+} from "../utils/helpers";
 import { getSetupHtml, getWebviewHtml } from "../webview/template";
 import { setApiKey } from "./setApiKey";
 
@@ -104,7 +110,11 @@ export async function askUstaad(
             "codeUstaad",
             "Code Ustaad",
             vscode.ViewColumn.Beside,
-            { enableScripts: true, retainContextWhenHidden: true },
+            {
+                enableScripts: true,
+                retainContextWhenHidden: true,
+                localResourceRoots: [context.extensionUri],
+            },
         );
 
         currentPanel.onDidDispose(
@@ -126,7 +136,9 @@ export async function askUstaad(
                                 command: "showHistoryItem",
                                 item: {
                                     ...item,
-                                    explanationHtml: renderMarkdown(item.explanation),
+                                    explanationHtml: renderMarkdown(
+                                        item.explanation,
+                                    ),
                                 },
                             });
                         }
@@ -139,9 +151,16 @@ export async function askUstaad(
                         });
                         break;
                     case "setupApiKey": {
-                        const keySet = await setApiKey(context);
-                        if (keySet) {
-                            vscode.commands.executeCommand("code-ustaad.askUstaad");
+                        const provider = await setApiKey(context);
+                        if (provider && currentPanel) {
+                            currentPanel.dispose();
+                            currentPanel = undefined;
+                            // Small delay to ensure config changes propagate
+                            setTimeout(() => {
+                                vscode.commands.executeCommand(
+                                    "code-ustaad.askUstaad",
+                                );
+                            }, 100);
                         }
                         break;
                     }
@@ -152,9 +171,17 @@ export async function askUstaad(
         );
     }
 
+    // Get icon URI for webview
+    const iconPath = vscode.Uri.joinPath(context.extensionUri, "icon.png");
+    const iconUri = currentPanel.webview.asWebviewUri(iconPath).toString();
+
     // If no API key, show setup screen
     if (!apiKey) {
-        currentPanel.webview.html = getSetupHtml(styles, config.provider);
+        currentPanel.webview.html = getSetupHtml(
+            styles,
+            config.provider,
+            iconUri,
+        );
         return;
     }
 
@@ -169,13 +196,29 @@ export async function askUstaad(
         displayLanguage: getDisplayLanguage(languageId),
         escapedCode: escapeHtml(selectedText),
         isLoading: true,
+        iconUri,
     });
 
     const systemPrompt =
         PERSONA_PROMPTS[config.personaIntensity] || PERSONA_PROMPTS.balanced;
 
+    // Check connectivity before making API call
+    const isOnline = await checkConnectivity();
+    if (!isOnline) {
+        const offlineError =
+            "Internet nahi chal raha bhai! Connection check karo.";
+        vscode.window.showErrorMessage(offlineError);
+        currentPanel.webview.postMessage({
+            command: "streamError",
+            error: offlineError,
+        });
+        return;
+    }
+
     try {
-        const largeCodeInstruction = isLargeSelection ? LARGE_CODE_INSTRUCTION : "";
+        const largeCodeInstruction = isLargeSelection
+            ? LARGE_CODE_INSTRUCTION
+            : "";
         const userPrompt = `Please explain this ${languageId} code:\n\n\`\`\`${languageId}\n${codeToExplain}\n\`\`\`${contextInfo}${largeCodeInstruction}`;
 
         const provider = createProvider(
@@ -228,39 +271,69 @@ export async function askUstaad(
 }
 
 function handleApiError(error: any, provider: string): string {
-    const statusCode = error?.status || error?.response?.status;
+    const statusCode =
+        error?.status || error?.response?.status || error?.statusCode;
     const errorMessage = error?.message || "Unknown error";
+    const lowerMessage = errorMessage.toLowerCase();
 
+    // Check for API key / authentication errors first
+    if (
+        statusCode === 401 ||
+        statusCode === 403 ||
+        lowerMessage.includes("invalid api key") ||
+        lowerMessage.includes("api key not valid") ||
+        lowerMessage.includes("api_key_invalid") ||
+        lowerMessage.includes("unauthorized") ||
+        lowerMessage.includes("authentication") ||
+        lowerMessage.includes("permission denied") ||
+        lowerMessage.includes("incorrect api key")
+    ) {
+        return "API key galat hai! 'Code Ustaad: Set API Key' command chalaao.";
+    }
+
+    // Rate limit / quota errors
     if (
         statusCode === 429 ||
         errorMessage.includes("429") ||
-        errorMessage.toLowerCase().includes("rate limit") ||
-        errorMessage.toLowerCase().includes("quota")
+        lowerMessage.includes("rate limit") ||
+        lowerMessage.includes("quota") ||
+        lowerMessage.includes("too many requests")
     ) {
         return provider === "gemini"
             ? "Gemini ka quota khatam ho gaya! Thoda wait karo."
             : "OpenAI ka rate limit hit ho gaya! Thoda wait karo.";
     }
 
-    if (
-        statusCode === 401 ||
-        errorMessage.toLowerCase().includes("invalid api key")
-    ) {
-        return "API key galat hai! 'Code Ustaad: Set API Key' command chalaao.";
-    }
-
+    // Model not found errors
     if (
         statusCode === 404 ||
-        errorMessage.toLowerCase().includes("not found")
+        lowerMessage.includes("model not found") ||
+        lowerMessage.includes("does not exist")
     ) {
         return "Model nahi mila! Settings mein sahi model select karo.";
     }
 
+    // Network errors - be more specific to avoid false positives
     if (
-        errorMessage.toLowerCase().includes("network") ||
-        errorMessage.toLowerCase().includes("fetch")
+        lowerMessage.includes("network error") ||
+        lowerMessage.includes("failed to fetch") ||
+        lowerMessage.includes("enotfound") ||
+        lowerMessage.includes("econnrefused") ||
+        lowerMessage.includes("etimedout") ||
+        lowerMessage.includes("econnreset") ||
+        lowerMessage.includes("socket hang up") ||
+        lowerMessage.includes("getaddrinfo") ||
+        lowerMessage.includes("dns") ||
+        error?.code === "ENOTFOUND" ||
+        error?.code === "ECONNREFUSED" ||
+        error?.code === "ETIMEDOUT" ||
+        error?.code === "ECONNRESET"
     ) {
-        return "Internet connection mein problem hai!";
+        return "Internet nahi chal raha bhai! Connection check karo.";
+    }
+
+    if (lowerMessage.includes("timeout")) {
+        return "Request timeout ho gaya! Server slow hai ya internet weak hai.";
     }
 
     return errorMessage;

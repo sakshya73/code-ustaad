@@ -5,17 +5,26 @@ export interface WebviewTemplateParams {
     displayLanguage: string;
     escapedCode: string;
     isLoading: boolean;
+    iconUri: string;
 }
 
 export function getWebviewHtml(params: WebviewTemplateParams): string {
-    const { styles, historyHtml, language, displayLanguage, escapedCode, isLoading } = params;
+    const {
+        styles,
+        historyHtml,
+        language,
+        displayLanguage,
+        escapedCode,
+        isLoading,
+        iconUri,
+    } = params;
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'unsafe-inline' https://cdnjs.cloudflare.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-webview-resource: https:; style-src 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'unsafe-inline' https://cdnjs.cloudflare.com;">
     <title>Code Ustaad</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <style>${styles}</style>
@@ -23,7 +32,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 <body>
     <div class="main-content">
         <div class="header">
-            <div class="ustaad-icon">🧑‍🏫</div>
+            <img class="ustaad-icon" src="${iconUri}" alt="Code Ustaad" />
             <div class="header-text">
                 <h1>Code Ustaad</h1>
                 <p>Seekho aur samjho!</p>
@@ -75,8 +84,8 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                 case 'streamUpdate':
                     // We wrap content in a div to attach the cursor
                     explanation.innerHTML = '<div class="streaming-content streaming-cursor">' + message.content + '</div>';
-                    // Auto-scroll to bottom while streaming
-                    explanation.scrollTop = explanation.scrollHeight;
+                    // Auto-scroll to bottom while streaming (scroll the parent section)
+                    explanation.parentElement.scrollTop = explanation.parentElement.scrollHeight;
                     break;
 
                 case 'streamComplete':
@@ -99,8 +108,8 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     historyCodeBlock.className = 'language-' + message.item.language;
                     historyCodeBlock.removeAttribute('data-highlighted');
                     explanation.innerHTML = message.item.explanationHtml;
-                    // Scroll to top when loading history
-                    explanation.scrollTop = 0;
+                    // Scroll to top when loading history (scroll the parent section)
+                    explanation.parentElement.scrollTop = 0;
                     // Re-highlight and add copy buttons
                     highlightCode();
                     addCopyButtons();
@@ -215,6 +224,9 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                             btn.textContent = 'Copy';
                             btn.classList.remove('copied');
                         }, 2000);
+                    }).catch(() => {
+                        btn.textContent = 'Failed';
+                        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
                     });
                 };
                 pre.appendChild(btn);
@@ -232,19 +244,24 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 </html>`;
 }
 
-export function getSetupHtml(styles: string, provider: string): string {
+export function getSetupHtml(
+    styles: string,
+    provider: string,
+    iconUri: string,
+): string {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-webview-resource: https:; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
     <title>Code Ustaad - Setup</title>
     <style>${styles}</style>
 </head>
 <body>
     <div class="main-content setup-wrapper">
         <div class="header">
-            <div class="ustaad-icon">🧑‍🏫</div>
+            <img class="ustaad-icon" src="${iconUri}" alt="Code Ustaad" />
             <div class="header-text">
                 <h1>Code Ustaad</h1>
                 <p>Seekho aur samjho!</p>
