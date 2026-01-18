@@ -1,6 +1,13 @@
 # 👨‍🏫 Code Ustaad (Code उस्ताद)
 
+[![Version](https://vsode.com/api/v/sakshya-arora.code-ustaad/version.svg)](https://marketplace.visualstudio.com/items?itemName=sakshya-arora.code-ustaad)
+[![Installs](https://vsode.com/api/i/sakshya-arora.code-ustaad/installs.svg)](https://marketplace.visualstudio.com/items?itemName=sakshya-arora.code-ustaad)
+[![License](https://img.shields.io/github/license/sakshya73/code-ustaad)](LICENSE)
+
 **Complex Code? Tension mat le, Ustaad hai na.**
+
+![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/main/assets/demo.gif?raw=true)
+<br />
 
 Code Ustaad is a VS Code and Cursor extension designed for developers who find English technical jargon overwhelming. It explains selected code snippets in **Hinglish** (Hindi + English), acting like a wise Senior Architect sitting right next to you.
 
@@ -48,7 +55,7 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 | Setting | Description |
 | :--- | :--- |
 | `codeUstaad.provider` | Choose AI provider: `openai` or `gemini` (default: `gemini`) |
-| `codeUstaad.geminiModel` | Gemini model to use (default: `gemini-2.0-flash`) |
+| `codeUstaad.geminiModel` | Gemini model to use (default: `gemini-2.5-flash`) |
 | `codeUstaad.openaiModel` | OpenAI model to use (default: `gpt-4o-mini`) |
 | `codeUstaad.personaIntensity` | Ustaad's teaching style: `strict`, `balanced`, or `funny` (default: `balanced`) |
 | `codeUstaad.maxHistoryItems` | Number of explanations to keep in history (default: `10`, max: `50`) |
@@ -100,6 +107,19 @@ Want to contribute? *Aaja maidan mein!*
 | `npm run lint` | Run Biome linter |
 | `npm run lint:fix` | Auto-fix linting issues |
 | `npm run format` | Format code with Biome |
+
+
+## ❓ Troubleshooting (Kuch Gadbad Hai?)
+
+* **Error: "Quota exceeded" / 429:**
+    * This means your free API limit is over for the day.
+    * *Fix:* Wait for a while or try a different API key.
+* **Error: "API Key Invalid":**
+    * You might have pasted the key with extra spaces.
+    * *Fix:* Run `Code Ustaad: Clear API Key` and set it again carefully.
+* **History sidebar disappeared?**
+    * Click the "🕒 History" button in the top right of the Code Ustaad panel to toggle it back.
+
 
 ## 🤝 Contributing
 

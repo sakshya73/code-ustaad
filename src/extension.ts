@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as vscode from "vscode";
 import {
     askUstaad,
@@ -11,20 +11,13 @@ import {
 } from "./commands";
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log("Code Ustaad is now active!");
-
-    // Load CSS
-    const stylesPath = path.join(
-        context.extensionPath,
-        "src",
-        "webview",
-        "styles.css",
-    );
+    // Load CSS from media folder (included in package)
+    const stylesPath = path.join(context.extensionPath, "media", "styles.css");
     try {
         const styles = fs.readFileSync(stylesPath, "utf8");
         setStyles(styles);
     } catch {
-        console.warn("Code Ustaad: Could not load styles.css");
+        console.warn("Code Ustaad: Could not load styles.css from", stylesPath);
     }
 
     // Register commands

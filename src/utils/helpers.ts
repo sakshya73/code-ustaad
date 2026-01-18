@@ -65,3 +65,30 @@ export function countLines(text: string): number {
 export function generateId(): string {
     return Date.now().toString();
 }
+
+export async function checkConnectivity(): Promise<boolean> {
+    try {
+        // Try to reach Google's DNS - lightweight check
+        const { request } = await import("node:https");
+        return new Promise((resolve) => {
+            const req = request(
+                {
+                    hostname: "dns.google",
+                    port: 443,
+                    path: "/",
+                    method: "HEAD",
+                    timeout: 3000,
+                },
+                () => resolve(true),
+            );
+            req.on("error", () => resolve(false));
+            req.on("timeout", () => {
+                req.destroy();
+                resolve(false);
+            });
+            req.end();
+        });
+    } catch {
+        return false;
+    }
+}

@@ -4,7 +4,7 @@ import { ConfigService, SecretsService } from "../services";
 
 export async function setApiKey(
     context: vscode.ExtensionContext,
-): Promise<boolean> {
+): Promise<ProviderType | null> {
     const secrets = new SecretsService(context);
 
     // Let user choose which provider's key to set
@@ -24,7 +24,7 @@ export async function setApiKey(
         { placeHolder: "Kaunsa API key set karna hai?" },
     );
 
-    if (!providerChoice) return false;
+    if (!providerChoice) return null;
 
     const provider = providerChoice.value;
 
@@ -42,8 +42,8 @@ export async function setApiKey(
         vscode.window.showInformationMessage(
             `${provider === "openai" ? "OpenAI" : "Gemini"} API key saved! Provider set to ${provider}.`,
         );
-        return true;
+        return provider;
     }
 
-    return false;
+    return null;
 }

@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import type { HistoryItem } from "../types";
 import { escapeHtml, extractCodeTitle } from "../utils/helpers";
 
@@ -16,7 +16,10 @@ export class HistoryService {
     }
 
     private load(): void {
-        this.items = this.context.globalState.get<HistoryItem[]>(HISTORY_KEY, []);
+        this.items = this.context.globalState.get<HistoryItem[]>(
+            HISTORY_KEY,
+            [],
+        );
     }
 
     private save(): void {
