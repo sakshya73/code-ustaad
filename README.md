@@ -61,9 +61,9 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 
 | Mode | Description |
 | :--- | :--- |
-| **Strict** | Focus on best practices, warnings, and correctness. Less jokes, more discipline. |
-| **Balanced** | Warm teaching with Indian analogies and encouragement. (Default) |
-| **Funny** | Bollywood dialogues, cricket commentary, and memes! *"Mogambo khush hua!"* |
+| **Strict** | Senior Tech Lead mode. No sugarcoating - *"Production mein fat jayega!"* |
+| **Balanced** | Helpful Senior Dev (Bhai) with daily life analogies. (Default) |
+| **Funny** | Mumbai/Bangalore tech slang with roasts! *"Yeh code Jalebi jaisa uljha hai!"* |
 
 ## 🛠️ Installation for Developers (Local Setup)
 
