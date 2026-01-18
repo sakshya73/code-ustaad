@@ -12,7 +12,7 @@ const md = new MarkdownIt({
     linkify: true,
 });
 
-interface HistoryItem {
+export interface HistoryItem {
     id: string;
     code: string;
     language: string;

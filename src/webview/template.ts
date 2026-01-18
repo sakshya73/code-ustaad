@@ -67,13 +67,16 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 
             switch (message.command) {
                 case 'streamUpdate':
-                    explanation.innerHTML = '<div class="streaming-cursor">' + message.content + '</div>';
+                    // We wrap content in a div to attach the cursor
+                    explanation.innerHTML = '<div class="streaming-content streaming-cursor">' + message.content + '</div>';
+                    // Auto-scroll to bottom while streaming
                     explanation.scrollTop = explanation.scrollHeight;
                     break;
 
                 case 'streamComplete':
-                    const cursor = explanation.querySelector('.streaming-cursor');
-                    if (cursor) cursor.classList.remove('streaming-cursor');
+                    // Remove the cursor animation class
+                    const contentDiv = explanation.querySelector('.streaming-content');
+                    if (contentDiv) contentDiv.classList.remove('streaming-cursor');
                     addToHistorySidebar(message.historyItem);
                     break;
 
@@ -84,6 +87,8 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                 case 'showHistoryItem':
                     document.getElementById('codeBlock').textContent = message.item.code;
                     explanation.innerHTML = message.item.explanationHtml;
+                    // Scroll to top when loading history
+                    explanation.scrollTop = 0;
                     break;
 
                 case 'historyCleared':
@@ -98,11 +103,16 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
             if (noHistory) noHistory.remove();
 
             const code = item.code.length > 30 ? item.code.slice(0, 30) + '...' : item.code;
-            const html = '<div class="history-item" data-id="' + item.id + '">' +
+            
+            // Create element safely
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.dataset.id = item.id;
+            div.innerHTML = 
                 '<span class="history-lang">' + item.language + '</span>' +
-                '<span class="history-code">' + escapeHtml(code) + '</span>' +
-            '</div>';
-            historyList.insertAdjacentHTML('afterbegin', html);
+                '<span class="history-code">' + escapeHtml(code) + '</span>';
+                
+            historyList.insertAdjacentElement('afterbegin', div);
         }
 
         function escapeHtml(text) {
@@ -111,10 +121,15 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
             return div.innerHTML;
         }
 
+        // Delegate click event for history items (handles both static and dynamic items)
         document.getElementById('historyList').addEventListener('click', (e) => {
             const item = e.target.closest('.history-item');
             if (item) {
                 vscode.postMessage({ command: 'loadHistory', id: item.dataset.id });
+                
+                // Visual feedback for selection
+                document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+                item.classList.add('active');
             }
         });
 
@@ -132,12 +147,11 @@ export function getSetupHtml(styles: string, provider: string): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
     <title>Code Ustaad - Setup</title>
     <style>${styles}</style>
 </head>
 <body>
-    <div class="main-content">
+    <div class="main-content setup-wrapper">
         <div class="header">
             <div class="ustaad-icon">🧑‍🏫</div>
             <div class="header-text">
@@ -150,7 +164,7 @@ export function getSetupHtml(styles: string, provider: string): string {
             <h2>API Key Required</h2>
             <p>Beta, pehle ${provider === "openai" ? "OpenAI" : "Gemini"} API key set karo!</p>
             <button class="setup-btn" onclick="setupApiKey()">Set API Key</button>
-            <p style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
+            <p class="secure-note">
                 Your key is stored securely using VS Code's SecretStorage.
             </p>
         </div>
@@ -158,7 +172,6 @@ export function getSetupHtml(styles: string, provider: string): string {
 
     <script>
         const vscode = acquireVsCodeApi();
-
         function setupApiKey() {
             vscode.postMessage({ command: 'setupApiKey' });
         }
