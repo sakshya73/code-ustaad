@@ -17,6 +17,14 @@
       {
         "command": "code-ustaad.askUstaad",
         "title": "Ask Ustaad"
+      },
+      {
+        "command": "code-ustaad.setApiKey",
+        "title": "Code Ustaad: Set API Key"
+      },
+      {
+        "command": "code-ustaad.clearApiKey",
+        "title": "Code Ustaad: Clear API Key"
       }
     ],
     "menus": {
@@ -43,16 +51,6 @@
             "Use OpenAI (GPT models)",
             "Use Google Gemini"
           ]
-        },
-        "codeUstaad.openaiApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "Your OpenAI API Key (required if using OpenAI)"
-        },
-        "codeUstaad.geminiApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "Your Google Gemini API Key (required if using Gemini)"
         },
         "codeUstaad.openaiModel": {
           "type": "string",
