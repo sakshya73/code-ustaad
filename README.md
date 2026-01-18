@@ -8,11 +8,14 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 
 ## ✨ Features
 
-* **Hinglish Explanations:** Get explanations that feel like a chat with a senior dev. ("*Dekho beta, ye loop basic filtering kar raha hai...*")
-* **Streaming Responses:** See text appear in real-time, character by character - no more waiting for the full response!
+* **Hinglish Explanations:** Get explanations that feel like a chat with a senior dev. ("*Dekho bhai, scene kya hai...*")
+* **Structured Responses:** Every explanation starts with "🧐 Ek Line Mein" (TL;DR summary), followed by detailed breakdown.
+* **Ustaad ka Fix:** When bugs are spotted, get copy-paste ready fixes in a dedicated code block.
+* **Syntax Highlighting:** Beautiful code highlighting powered by highlight.js - looks like VS Code!
+* **Streaming Responses:** See text appear in real-time, character by character - no more waiting!
 * **Multiple AI Providers:** Choose between OpenAI (GPT) or Google Gemini - use whichever you have access to.
-* **History Panel:** Compare multiple explanations side-by-side. Your history is saved across sessions.
-* **Persona Modes:** Choose Ustaad's teaching style - Strict, Balanced, or Funny (with Bollywood references!)
+* **Smart History Panel:** Collapsible sidebar (🕒 button) with smart labels showing function/component names.
+* **Persona Modes:** Choose Ustaad's teaching style - Strict, Balanced, or Funny (with tech slang!)
 * **Smart Context:** Select even a single word - Ustaad grabs surrounding code for accurate explanations.
 * **Keyboard Shortcut:** `Cmd+Shift+U` (Mac) / `Ctrl+Shift+U` (Windows/Linux) for instant access.
 * **Secure Key Storage:** API keys stored securely using VS Code's encrypted SecretStorage.
