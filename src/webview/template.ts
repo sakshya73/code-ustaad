@@ -2,12 +2,13 @@ export interface WebviewTemplateParams {
     styles: string;
     historyHtml: string;
     language: string;
+    displayLanguage: string;
     escapedCode: string;
     isLoading: boolean;
 }
 
 export function getWebviewHtml(params: WebviewTemplateParams): string {
-    const { styles, historyHtml, language, escapedCode, isLoading } = params;
+    const { styles, historyHtml, language, displayLanguage, escapedCode, isLoading } = params;
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -16,7 +17,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'unsafe-inline' https://cdnjs.cloudflare.com;">
     <title>Code Ustaad</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <style>${styles}</style>
 </head>
 <body>
@@ -27,11 +28,11 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                 <h1>Code Ustaad</h1>
                 <p>Seekho aur samjho!</p>
             </div>
-            <button class="history-toggle-btn" onclick="toggleHistory()" title="Toggle History">🕒</button>
+            <button class="history-toggle-btn" onclick="toggleHistory()" title="Toggle History">🕒 History</button>
         </div>
 
         <div class="section">
-            <div class="section-title">Selected Code (${language})</div>
+            <div class="section-title">Selected Code (${displayLanguage})</div>
             <pre class="code-block"><code class="language-${language}" id="codeBlock">${escapedCode}</code></pre>
         </div>
 
@@ -53,7 +54,10 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3>History</h3>
-            <button class="clear-btn" onclick="clearHistory()">Clear</button>
+            <div class="sidebar-actions">
+                <button class="clear-btn" onclick="clearHistory()">Clear</button>
+                <button class="close-btn" onclick="toggleHistory()" title="Close">✕</button>
+            </div>
         </div>
         <div class="history-list" id="historyList">
             ${historyHtml || '<div class="no-history">No history yet</div>'}
@@ -80,8 +84,9 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     const contentDiv = explanation.querySelector('.streaming-content');
                     if (contentDiv) contentDiv.classList.remove('streaming-cursor');
                     addToHistorySidebar(message.historyItem);
-                    // Highlight code blocks in the explanation
+                    // Highlight code blocks and add copy buttons
                     highlightCode();
+                    addCopyButtons();
                     break;
 
                 case 'streamError':
@@ -96,8 +101,9 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     explanation.innerHTML = message.item.explanationHtml;
                     // Scroll to top when loading history
                     explanation.scrollTop = 0;
-                    // Re-highlight
+                    // Re-highlight and add copy buttons
                     highlightCode();
+                    addCopyButtons();
                     break;
 
                 case 'historyCleared':
@@ -185,6 +191,33 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                 if (!block.classList.contains('hljs')) {
                     hljs.highlightElement(block);
                 }
+            });
+        }
+
+        function addCopyButtons() {
+            document.querySelectorAll('.explanation pre').forEach((pre) => {
+                // Skip if already has a copy button
+                if (pre.querySelector('.copy-btn')) return;
+
+                // Create wrapper for positioning
+                pre.style.position = 'relative';
+
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.onclick = function() {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+                    navigator.clipboard.writeText(text).then(() => {
+                        btn.textContent = 'Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = 'Copy';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    });
+                };
+                pre.appendChild(btn);
             });
         }
     </script>
