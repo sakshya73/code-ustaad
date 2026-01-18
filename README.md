@@ -2,7 +2,7 @@
 
 **Complex Code? Tension mat le, Ustaad hai na.**
 
-![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/main/assets/demo.gif?raw=true)
+![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/dev/assets/demo.gif?raw=true)
 <br />
 
 Code Ustaad is a VS Code and Cursor extension designed for developers who find English technical jargon overwhelming. It explains selected code snippets in **Hinglish** (Hindi + English), acting like a wise Senior Architect sitting right next to you.
