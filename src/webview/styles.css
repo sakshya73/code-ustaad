@@ -67,6 +67,12 @@ body {
     opacity: 0.8;
 }
 
+.sidebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .clear-btn {
     background: none;
     border: none;
@@ -77,6 +83,21 @@ body {
 }
 
 .clear-btn:hover { text-decoration: underline; }
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--vscode-editor-foreground, #d4d4d4);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
 
 .history-list {
     flex: 1;
@@ -163,16 +184,21 @@ body {
 .history-toggle-btn {
     background: var(--vscode-button-secondaryBackground, #3a3d41);
     color: var(--vscode-button-secondaryForeground, #fff);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
+    border: 1px solid var(--vscode-panel-border, #454545);
+    padding: 6px 14px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background 0.15s ease;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .history-toggle-btn:hover {
     background: var(--vscode-button-secondaryHoverBackground, #45494e);
+    border-color: var(--vscode-focusBorder, #007fd4);
 }
 
 .ustaad-icon { font-size: 32px; }
@@ -305,6 +331,35 @@ body {
 .explanation pre code.hljs {
     background: transparent;
     padding: 12px;
+}
+
+/* Copy Button */
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--vscode-button-secondaryBackground, #3a3d41);
+    color: var(--vscode-button-secondaryForeground, #fff);
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.explanation pre:hover .copy-btn {
+    opacity: 1;
+}
+
+.copy-btn:hover {
+    background: var(--vscode-button-secondaryHoverBackground, #505558);
+}
+
+.copy-btn.copied {
+    background: var(--vscode-testing-iconPassed, #388a34);
+    opacity: 1;
 }
 
 /* Lists */

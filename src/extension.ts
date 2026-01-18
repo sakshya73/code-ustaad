@@ -26,7 +26,7 @@ RESPONSE FORMAT:
 1. Start with "## 🧐 Ek Line Mein" followed by a 1-sentence simple summary of what this code does.
 2. Then "## 📖 Detail Mein" for the detailed line-by-line explanation.
 3. **Bold** all key technical terms (function names, variable names, concepts like "state", "props", "callback", "async", etc.) for easy scanning.
-4. If you spot a bug, missing code, or improvement (like a missing cleanup function, memory leak, or security issue), end with "## ✅ Ustaad ka Fix" containing the FIXED CODE in a markdown code block. Make it copy-paste ready.`;
+4. ONLY if there are actual bugs, errors, missing cleanup, security issues, or major optimizations needed, include "## ✅ Ustaad ka Fix" with the corrected code in a markdown code block. If the code is correct and has no issues, DO NOT include this section at all - just end after the explanation.`;
 
 const PERSONA_PROMPTS = {
     strict: `You are "Code Ustaad" - a strict but fair Senior Tech Lead. You speak in Hinglish.
@@ -62,6 +62,38 @@ const SECRET_KEYS = {
     openai: "codeUstaad.openaiApiKey",
     gemini: "codeUstaad.geminiApiKey",
 };
+
+const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
+    typescriptreact: "TypeScript React",
+    javascriptreact: "JavaScript React",
+    typescript: "TypeScript",
+    javascript: "JavaScript",
+    python: "Python",
+    java: "Java",
+    csharp: "C#",
+    cpp: "C++",
+    c: "C",
+    go: "Go",
+    rust: "Rust",
+    ruby: "Ruby",
+    php: "PHP",
+    swift: "Swift",
+    kotlin: "Kotlin",
+    html: "HTML",
+    css: "CSS",
+    scss: "SCSS",
+    json: "JSON",
+    yaml: "YAML",
+    markdown: "Markdown",
+    sql: "SQL",
+    shellscript: "Shell",
+    bash: "Bash",
+    powershell: "PowerShell",
+};
+
+function getDisplayLanguage(languageId: string): string {
+    return LANGUAGE_DISPLAY_NAMES[languageId] || languageId.charAt(0).toUpperCase() + languageId.slice(1);
+}
 
 const MIN_SELECTION_LENGTH = 20;
 const CONTEXT_LINES = 10;
@@ -331,6 +363,7 @@ async function askUstaad(context: vscode.ExtensionContext): Promise<void> {
         styles,
         historyHtml,
         language: languageId,
+        displayLanguage: getDisplayLanguage(languageId),
         escapedCode: escapeHtml(selectedText),
         isLoading: true,
     });
