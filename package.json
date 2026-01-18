@@ -36,6 +36,14 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "code-ustaad.askUstaad",
+        "key": "ctrl+shift+u",
+        "mac": "cmd+shift+u",
+        "when": "editorTextFocus && editorHasSelection"
+      }
+    ],
     "configuration": {
       "title": "Code Ustaad",
       "properties": {

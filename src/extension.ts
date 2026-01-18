@@ -12,7 +12,7 @@ const md = new MarkdownIt({
     linkify: true,
 });
 
-interface HistoryItem {
+export interface HistoryItem {
     id: string;
     code: string;
     language: string;
@@ -20,44 +20,42 @@ interface HistoryItem {
     timestamp: Date;
 }
 
+const FORMAT_INSTRUCTION = `
+
+RESPONSE FORMAT:
+1. Start with "## 🧐 Ek Line Mein" followed by a 1-sentence simple summary of what this code does.
+2. Then "## 📖 Detail Mein" for the detailed line-by-line explanation.
+3. **Bold** all key technical terms (function names, variable names, concepts like "state", "props", "callback", "async", etc.) for easy scanning.
+4. If you spot a bug, missing code, or improvement (like a missing cleanup function, memory leak, or security issue), end with "## ✅ Ustaad ka Fix" containing the FIXED CODE in a markdown code block. Make it copy-paste ready.`;
+
 const PERSONA_PROMPTS = {
-    strict: `You are "Code Ustaad" - a strict but fair Indian mentor who focuses on best practices and proper coding standards. You speak in Hinglish.
+    strict: `You are "Code Ustaad" - a strict but fair Senior Tech Lead. You speak in Hinglish.
 
 Your style:
-- Address students as "beta" but be firm about mistakes
-- Point out potential bugs, security issues, and bad practices immediately
-- Use phrases like "Yeh galat hai", "Isko theek karo", "Best practice yeh hai"
-- Give warnings about common pitfalls
-- Less jokes, more focus on correctness
-- End with a clear action item or improvement suggestion`,
+- Address the user as "Bhai" or "Boss" but be firm about mistakes.
+- Point out potential bugs, security issues, and bad practices immediately.
+- Use phrases like "Yeh approach galat hai bhai", "Production mein fat jayega", "Standard practice yeh hai".
+- Don't sugarcoat it. If the code is bad, say it's risky.
+- End with a clear action item: "Chup chaap yeh fix kar lo."${FORMAT_INSTRUCTION}`,
 
-    balanced: `You are "Code Ustaad" - a wise, experienced Indian mentor who teaches programming with warmth and wisdom. You speak in Hinglish (Hindi + English).
+    balanced: `You are "Code Ustaad" - a helpful and experienced Senior Developer (Bhai) who guides juniors. You speak in Hinglish (Hindi + English).
 
 Your personality:
-- Address students as "beta" or "shishya" affectionately
-- Use phrases like "Dekho beta", "Samjho", "Bilkul sahi", "Arey wah!"
-- Explain using Indian daily life analogies (chai, cricket, family gatherings)
-- Be patient and encouraging
-- Use words like "accha", "theek hai", "bahut badiya"
+- Address the user as "Bhai", "Dost", or "Guru".
+- Use phrases like "Dekho bhai", "Concept samjho", "Sahi hai", "Load mat lo".
+- Explain using daily life analogies (traffic, food, cricket).
+- Be encouraging but technical.
+- Use words like "Scene kya hai", "Basically", "Jugad", "Optimize".
+- If code is complex, say: "Thoda tricky hai, par samajh lenge."${FORMAT_INSTRUCTION}`,
 
-When explaining:
-1. Give a brief overview first
-2. Break down code line by line if needed
-3. Use relatable analogies
-4. Highlight important concepts and pitfalls
-5. End with encouragement and a tip`,
-
-    funny: `You are "Code Ustaad" - a hilarious Indian mentor who makes learning fun with jokes and Bollywood references. You speak in Hinglish with extra masala!
+    funny: `You are "Code Ustaad" - a hilarious Tech Lead who keeps the mood light. You speak in Hinglish with Mumbai/Bangalore tech slang.
 
 Your style:
-- Address students as "beta", "mere yaar", "bhai sahab"
-- Use Bollywood dialogues: "Mogambo khush hua" (when code works), "Kitne aadmi the?" (counting loops)
-- Make funny analogies: "Yeh loop Salman Khan ki gaadi jaisa hai - kabhi rukta nahi!"
-- Add dramatic reactions: "Arey baap re!", "Kya scene hai!", "Ekdum jhakaas!"
-- Use cricket commentary style for explaining logic
-- Include at least one joke or meme reference per explanation
-- Still teach correctly, but make it entertaining
-- End with a filmy dialogue or funny encouragement`,
+- Address user as "Bhai", "Biddu", "Mere Cheetey", or "Ustaad".
+- Use slang: "Bhasad mach gayi", "Code phat gaya", "Chamka kya?", "Scene set hai".
+- Make funny analogies: "Yeh code toh Jalebi ki tarah uljha hua hai", "Yeh loop kabhi khatam nahi hoga, Suryavansham ki tarah".
+- Roast the code gently if it's bad.
+- End with a filmy dialogue or high energy encouragement ("Chha gaye guru!").${FORMAT_INSTRUCTION}`,
 };
 
 const SECRET_KEYS = {
@@ -116,9 +114,23 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
-async function setApiKey(context: vscode.ExtensionContext): Promise<void> {
-    const config = vscode.workspace.getConfiguration("codeUstaad");
-    const provider = config.get<string>("provider") || "gemini";
+async function setApiKey(context: vscode.ExtensionContext): Promise<boolean> {
+    // Let user choose which provider's key to set
+    const providerChoice = await vscode.window.showQuickPick(
+        [
+            {
+                label: "Gemini",
+                description: "Google Gemini API",
+                value: "gemini",
+            },
+            { label: "OpenAI", description: "OpenAI GPT API", value: "openai" },
+        ],
+        { placeHolder: "Kaunsa API key set karna hai?" },
+    );
+
+    if (!providerChoice) return false;
+
+    const provider = providerChoice.value;
 
     const apiKey = await vscode.window.showInputBox({
         prompt: `Enter your ${provider === "openai" ? "OpenAI" : "Gemini"} API Key`,
@@ -132,22 +144,59 @@ async function setApiKey(context: vscode.ExtensionContext): Promise<void> {
             SECRET_KEYS[provider as keyof typeof SECRET_KEYS],
             apiKey,
         );
-        vscode.window.showInformationMessage(
-            `${provider === "openai" ? "OpenAI" : "Gemini"} API key saved securely!`,
+
+        // Also update the provider setting to match
+        const config = vscode.workspace.getConfiguration("codeUstaad");
+        await config.update(
+            "provider",
+            provider,
+            vscode.ConfigurationTarget.Global,
         );
+
+        vscode.window.showInformationMessage(
+            `${provider === "openai" ? "OpenAI" : "Gemini"} API key saved! Provider set to ${provider}.`,
+        );
+        return true;
     }
+    return false;
 }
 
 async function clearApiKey(context: vscode.ExtensionContext): Promise<void> {
-    const config = vscode.workspace.getConfiguration("codeUstaad");
-    const provider = config.get<string>("provider") || "gemini";
+    const providerChoice = await vscode.window.showQuickPick(
+        [
+            {
+                label: "Gemini",
+                description: "Clear Gemini API key",
+                value: "gemini",
+            },
+            {
+                label: "OpenAI",
+                description: "Clear OpenAI API key",
+                value: "openai",
+            },
+            {
+                label: "Both",
+                description: "Clear both API keys",
+                value: "both",
+            },
+        ],
+        { placeHolder: "Kaunsa API key clear karna hai?" },
+    );
 
-    await context.secrets.delete(
-        SECRET_KEYS[provider as keyof typeof SECRET_KEYS],
-    );
-    vscode.window.showInformationMessage(
-        `${provider === "openai" ? "OpenAI" : "Gemini"} API key cleared!`,
-    );
+    if (!providerChoice) return;
+
+    if (providerChoice.value === "both") {
+        await context.secrets.delete(SECRET_KEYS.gemini);
+        await context.secrets.delete(SECRET_KEYS.openai);
+        vscode.window.showInformationMessage("Dono API keys clear ho gaye!");
+    } else {
+        await context.secrets.delete(
+            SECRET_KEYS[providerChoice.value as keyof typeof SECRET_KEYS],
+        );
+        vscode.window.showInformationMessage(
+            `${providerChoice.label} API key clear ho gaya!`,
+        );
+    }
 }
 
 async function askUstaad(context: vscode.ExtensionContext): Promise<void> {
@@ -251,9 +300,16 @@ async function askUstaad(context: vscode.ExtensionContext): Promise<void> {
                             command: "historyCleared",
                         });
                         break;
-                    case "setupApiKey":
-                        await setApiKey(context);
+                    case "setupApiKey": {
+                        const keySet = await setApiKey(context);
+                        if (keySet) {
+                            // Refresh the panel by re-triggering askUstaad
+                            vscode.commands.executeCommand(
+                                "code-ustaad.askUstaad",
+                            );
+                        }
                         break;
+                    }
                 }
             },
             null,
@@ -362,18 +418,61 @@ async function askUstaad(context: vscode.ExtensionContext): Promise<void> {
     }
 }
 
+function extractCodeTitle(code: string): string {
+    const trimmed = code.trim();
+
+    // Try to extract meaningful names using regex patterns
+    const patterns = [
+        // React component: function ComponentName( or const ComponentName =
+        /(?:function|const|let|var)\s+([A-Z][a-zA-Z0-9]*)\s*[=(]/,
+        // Regular function: function name(
+        /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/,
+        // Arrow function: const name = ( or const name = async (
+        /(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s*)?\(/,
+        // Class declaration: class ClassName
+        /class\s+([A-Z][a-zA-Z0-9]*)/,
+        // Method: methodName( or async methodName(
+        /(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\([^)]*\)\s*{/,
+        // Hook usage: useEffect, useState, etc.
+        /(use[A-Z][a-zA-Z]*)\s*\(/,
+        // Export default function/class
+        /export\s+default\s+(?:function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/,
+    ];
+
+    for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (match?.[1]) {
+            return match[1];
+        }
+    }
+
+    // Fallback: first meaningful line (skip comments, whitespace)
+    const lines = trimmed.split("\n");
+    for (const line of lines) {
+        const cleaned = line.trim();
+        if (cleaned && !cleaned.startsWith("//") && !cleaned.startsWith("/*")) {
+            // Return first 25 chars of first meaningful line
+            return cleaned.slice(0, 25) + (cleaned.length > 25 ? "..." : "");
+        }
+    }
+
+    return "Code snippet";
+}
+
 function getHistoryHtml(items: HistoryItem[]): string {
     if (items.length === 0) return "";
 
     return items
         .slice(0, 10)
-        .map(
-            (item) => `
+        .map((item) => {
+            const title = extractCodeTitle(item.code);
+            const preview = item.code.trim().split("\n")[0].slice(0, 30);
+            return `
         <div class="history-item" data-id="${item.id}">
-            <span class="history-lang">${item.language}</span>
-            <span class="history-code">${escapeHtml(item.code.slice(0, 30))}${item.code.length > 30 ? "..." : ""}</span>
-        </div>`,
-        )
+            <span class="history-lang">${escapeHtml(title)}</span>
+            <span class="history-code">${escapeHtml(preview)}${preview.length >= 30 ? "..." : ""}</span>
+        </div>`;
+        })
         .join("");
 }
 
