@@ -110,6 +110,10 @@ We welcome contributions! Whether it's improving the "Ustaad" system prompt to b
 3. Commit your changes.
 4. Open a Pull Request.
 
+## 🔒 Privacy
+
+Your code is sent directly to OpenAI/Gemini using **your own API key**. We don't store, see, or process your code on any server. [Read full Privacy Policy](PRIVACY.md)
+
 ## 📜 License
 
 MIT License. *Dil khol ke use karo.*

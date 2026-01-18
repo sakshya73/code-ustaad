@@ -1,14 +1,34 @@
 {
   "name": "code-ustaad",
-  "displayName": "Code Ustaad",
-  "description": "A wise Indian Ustaad (Mentor) who explains your code in Hinglish",
+  "displayName": "Code Ustaad 👨‍🏫",
+  "description": "Your AI coding mentor. Explains complex code in Hinglish (Hindi + English).",
   "version": "0.0.1",
-  "publisher": "code-ustaad",
+  "publisher": "YOUR-MARKETPLACE-ID", 
+  "icon": "icon.png", 
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sakshya73/code-ustaad"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Education",
+    "Machine Learning" 
+  ],
+  "keywords": [
+    "hinglish",
+    "hindi",
+    "python",
+    "react",
+    "javascript",
+    "mentor",
+    "beginner",
+    "ai",
+    "gemini",
+    "openai"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
@@ -16,7 +36,7 @@
     "commands": [
       {
         "command": "code-ustaad.askUstaad",
-        "title": "Ask Ustaad"
+        "title": "Ask Ustaad (Explain in Hinglish)" 
       },
       {
         "command": "code-ustaad.setApiKey",
@@ -50,14 +70,14 @@
         "codeUstaad.provider": {
           "type": "string",
           "default": "gemini",
-          "description": "AI provider to use",
+          "description": "Choose your AI provider. Gemini is recommended for free usage.",
           "enum": [
-            "openai",
-            "gemini"
+            "gemini",
+            "openai"
           ],
           "enumDescriptions": [
-            "Use OpenAI (GPT models)",
-            "Use Google Gemini"
+            "Use Google Gemini (Free Tier Available)",
+            "Use OpenAI (Requires Paid Credits)"
           ]
         },
         "codeUstaad.openaiModel": {
@@ -67,18 +87,17 @@
           "enum": [
             "gpt-4o",
             "gpt-4o-mini",
-            "gpt-4-turbo",
             "gpt-3.5-turbo"
           ]
         },
         "codeUstaad.geminiModel": {
           "type": "string",
-          "default": "gemini-2.0-flash",
-          "description": "Gemini model to use",
+          "default": "gemini-1.5-flash", 
+          "description": "Gemini model to use. 1.5-flash is best for speed and free tier.",
           "enum": [
-            "gemini-2.0-flash",
+            "gemini-1.5-flash",
             "gemini-1.5-pro",
-            "gemini-1.0-pro"
+            "gemini-2.0-flash"
           ]
         },
         "codeUstaad.personaIntensity": {
@@ -91,9 +110,9 @@
             "funny"
           ],
           "enumDescriptions": [
-            "Strict mentor - focus on best practices and warnings",
-            "Balanced - mix of teaching and encouragement",
-            "Funny - more jokes, Bollywood references, and casual tone"
+            "Strict Tech Lead - Focus on bugs and best practices",
+            "Balanced Mentor - Mix of teaching and encouragement",
+            "Funny Bhai - Jokes, Bollywood references, and slang"
           ]
         },
         "codeUstaad.maxHistoryItems": {
