@@ -20,16 +20,6 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
     <style>${styles}</style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h3>History</h3>
-            <button class="clear-btn" onclick="clearHistory()">Clear</button>
-        </div>
-        <div class="history-list" id="historyList">
-            ${historyHtml || '<div class="no-history">No history yet</div>'}
-        </div>
-    </div>
-
     <div class="main-content">
         <div class="header">
             <div class="ustaad-icon">🧑‍🏫</div>
@@ -37,6 +27,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                 <h1>Code Ustaad</h1>
                 <p>Seekho aur samjho!</p>
             </div>
+            <button class="history-toggle-btn" onclick="toggleHistory()" title="Toggle History">🕒</button>
         </div>
 
         <div class="section">
@@ -56,6 +47,16 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                         : ""
                 }
             </div>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>History</h3>
+            <button class="clear-btn" onclick="clearHistory()">Clear</button>
+        </div>
+        <div class="history-list" id="historyList">
+            ${historyHtml || '<div class="no-history">No history yet</div>'}
         </div>
     </div>
 
@@ -167,6 +168,11 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 
         function clearHistory() {
             vscode.postMessage({ command: 'clearHistory' });
+        }
+
+        function toggleHistory() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
         }
 
         function highlightCode() {
