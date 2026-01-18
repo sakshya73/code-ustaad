@@ -94,16 +94,19 @@ body {
 
 .history-lang {
     display: block;
-    font-size: 10px;
-    color: var(--vscode-textPreformat-foreground, #ce9178);
-    font-weight: bold;
-    margin-bottom: 2px;
+    font-size: 12px;
+    color: var(--vscode-editor-foreground, #d4d4d4);
+    font-weight: 600;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .history-code {
-    font-size: 11px;
+    font-size: 10px;
     font-family: var(--vscode-editor-font-family, monospace);
-    opacity: 0.8;
+    opacity: 0.6;
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -178,22 +181,47 @@ body {
 }
 
 .code-block {
-    background: var(--vscode-textCodeBlock-background, #2d2d2d);
+    background: var(--vscode-textCodeBlock-background, #1e1e1e);
     border: 1px solid var(--vscode-panel-border, #454545);
     border-radius: 6px;
-    padding: 12px;
-    font-family: var(--vscode-editor-font-family, monospace);
-    font-size: 12px;
-    white-space: pre-wrap;
+    padding: 0;
+    margin: 0;
+    font-family: var(--vscode-editor-font-family, 'Consolas', 'Monaco', monospace);
+    font-size: 13px;
+    white-space: pre;
     overflow-x: auto;
-    max-height: 150px; /* Limit code block height */
+    max-height: 200px;
+}
+
+.code-block code {
+    display: block;
+    padding: 12px;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+}
+
+/* Override highlight.js background to match VS Code */
+.code-block code.hljs {
+    background: transparent;
+    padding: 12px;
 }
 
 /* --- Explanation Styles (The most important part) --- */
 .explanation {
     font-size: 14px;
-    line-height: 1.7;
-    /* Removed fixed borders/backgrounds to look more like a document */
+    line-height: 1.8;
+    letter-spacing: 0.2px;
+}
+
+.explanation p {
+    margin-bottom: 12px;
+}
+
+.explanation strong {
+    color: var(--vscode-textLink-foreground, #3794ff);
+    font-weight: 600;
 }
 
 /* Links */
@@ -225,26 +253,37 @@ body {
     color: var(--vscode-textPreformat-foreground);
 }
 
-/* Code Blocks */
+/* Code Blocks in Explanation */
 .explanation pre {
     background: var(--vscode-textCodeBlock-background, #1e1e1e);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 6px;
-    padding: 12px;
+    padding: 0;
     margin: 12px 0;
     overflow-x: auto;
 }
 .explanation pre code {
-    background: none;
-    padding: 0;
+    display: block;
+    padding: 12px;
+    background: transparent;
     color: inherit;
+    font-family: var(--vscode-editor-font-family, 'Consolas', 'Monaco', monospace);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.explanation pre code.hljs {
+    background: transparent;
+    padding: 12px;
 }
 
 /* Lists */
 .explanation ul, .explanation ol {
-    margin: 10px 0 10px 20px;
+    margin: 12px 0 12px 24px;
 }
-.explanation li { margin-bottom: 4px; }
+.explanation li {
+    margin-bottom: 8px;
+    line-height: 1.7;
+}
 
 /* Blockquotes */
 .explanation blockquote {

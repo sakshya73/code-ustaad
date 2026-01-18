@@ -20,6 +20,14 @@ export interface HistoryItem {
     timestamp: Date;
 }
 
+const FORMAT_INSTRUCTION = `
+
+RESPONSE FORMAT:
+1. Start with "## 🧐 Ek Line Mein" followed by a 1-sentence simple summary of what this code does.
+2. Then "## 📖 Detail Mein" for the detailed line-by-line explanation.
+3. **Bold** all key technical terms (function names, variable names, concepts like "state", "props", "callback", "async", etc.) for easy scanning.
+4. If you spot a bug, missing code, or improvement (like a missing cleanup function, memory leak, or security issue), end with "## ✅ Ustaad ka Fix" containing the FIXED CODE in a markdown code block. Make it copy-paste ready.`;
+
 const PERSONA_PROMPTS = {
     strict: `You are "Code Ustaad" - a strict but fair Senior Tech Lead. You speak in Hinglish.
 
@@ -28,7 +36,7 @@ Your style:
 - Point out potential bugs, security issues, and bad practices immediately.
 - Use phrases like "Yeh approach galat hai bhai", "Production mein fat jayega", "Standard practice yeh hai".
 - Don't sugarcoat it. If the code is bad, say it's risky.
-- End with a clear action item: "Chup chaap yeh fix kar lo."`,
+- End with a clear action item: "Chup chaap yeh fix kar lo."${FORMAT_INSTRUCTION}`,
 
     balanced: `You are "Code Ustaad" - a helpful and experienced Senior Developer (Bhai) who guides juniors. You speak in Hinglish (Hindi + English).
 
@@ -38,7 +46,7 @@ Your personality:
 - Explain using daily life analogies (traffic, food, cricket).
 - Be encouraging but technical.
 - Use words like "Scene kya hai", "Basically", "Jugad", "Optimize".
-- If code is complex, say: "Thoda tricky hai, par samajh lenge."`,
+- If code is complex, say: "Thoda tricky hai, par samajh lenge."${FORMAT_INSTRUCTION}`,
 
     funny: `You are "Code Ustaad" - a hilarious Tech Lead who keeps the mood light. You speak in Hinglish with Mumbai/Bangalore tech slang.
 
@@ -47,7 +55,7 @@ Your style:
 - Use slang: "Bhasad mach gayi", "Code phat gaya", "Chamka kya?", "Scene set hai".
 - Make funny analogies: "Yeh code toh Jalebi ki tarah uljha hua hai", "Yeh loop kabhi khatam nahi hoga, Suryavansham ki tarah".
 - Roast the code gently if it's bad.
-- End with a filmy dialogue or high energy encouragement ("Chha gaye guru!").`,
+- End with a filmy dialogue or high energy encouragement ("Chha gaye guru!").${FORMAT_INSTRUCTION}`,
 };
 
 const SECRET_KEYS = {
@@ -410,18 +418,61 @@ async function askUstaad(context: vscode.ExtensionContext): Promise<void> {
     }
 }
 
+function extractCodeTitle(code: string): string {
+    const trimmed = code.trim();
+
+    // Try to extract meaningful names using regex patterns
+    const patterns = [
+        // React component: function ComponentName( or const ComponentName =
+        /(?:function|const|let|var)\s+([A-Z][a-zA-Z0-9]*)\s*[=(]/,
+        // Regular function: function name(
+        /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/,
+        // Arrow function: const name = ( or const name = async (
+        /(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s*)?\(/,
+        // Class declaration: class ClassName
+        /class\s+([A-Z][a-zA-Z0-9]*)/,
+        // Method: methodName( or async methodName(
+        /(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\([^)]*\)\s*{/,
+        // Hook usage: useEffect, useState, etc.
+        /(use[A-Z][a-zA-Z]*)\s*\(/,
+        // Export default function/class
+        /export\s+default\s+(?:function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/,
+    ];
+
+    for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (match?.[1]) {
+            return match[1];
+        }
+    }
+
+    // Fallback: first meaningful line (skip comments, whitespace)
+    const lines = trimmed.split("\n");
+    for (const line of lines) {
+        const cleaned = line.trim();
+        if (cleaned && !cleaned.startsWith("//") && !cleaned.startsWith("/*")) {
+            // Return first 25 chars of first meaningful line
+            return cleaned.slice(0, 25) + (cleaned.length > 25 ? "..." : "");
+        }
+    }
+
+    return "Code snippet";
+}
+
 function getHistoryHtml(items: HistoryItem[]): string {
     if (items.length === 0) return "";
 
     return items
         .slice(0, 10)
-        .map(
-            (item) => `
+        .map((item) => {
+            const title = extractCodeTitle(item.code);
+            const preview = item.code.trim().split("\n")[0].slice(0, 30);
+            return `
         <div class="history-item" data-id="${item.id}">
-            <span class="history-lang">${item.language}</span>
-            <span class="history-code">${escapeHtml(item.code.slice(0, 30))}${item.code.length > 30 ? "..." : ""}</span>
-        </div>`,
-        )
+            <span class="history-lang">${escapeHtml(title)}</span>
+            <span class="history-code">${escapeHtml(preview)}${preview.length >= 30 ? "..." : ""}</span>
+        </div>`;
+        })
         .join("");
 }
 

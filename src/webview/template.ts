@@ -14,8 +14,9 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'unsafe-inline' https://cdnjs.cloudflare.com;">
     <title>Code Ustaad</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
     <style>${styles}</style>
 </head>
 <body>
@@ -40,7 +41,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 
         <div class="section">
             <div class="section-title">Selected Code (${language})</div>
-            <pre class="code-block" id="codeBlock">${escapedCode}</pre>
+            <pre class="code-block"><code class="language-${language}" id="codeBlock">${escapedCode}</code></pre>
         </div>
 
         <div class="section">
@@ -78,6 +79,8 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     const contentDiv = explanation.querySelector('.streaming-content');
                     if (contentDiv) contentDiv.classList.remove('streaming-cursor');
                     addToHistorySidebar(message.historyItem);
+                    // Highlight code blocks in the explanation
+                    highlightCode();
                     break;
 
                 case 'streamError':
@@ -85,10 +88,15 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     break;
 
                 case 'showHistoryItem':
-                    document.getElementById('codeBlock').textContent = message.item.code;
+                    const historyCodeBlock = document.getElementById('codeBlock');
+                    historyCodeBlock.textContent = message.item.code;
+                    historyCodeBlock.className = 'language-' + message.item.language;
+                    historyCodeBlock.removeAttribute('data-highlighted');
                     explanation.innerHTML = message.item.explanationHtml;
                     // Scroll to top when loading history
                     explanation.scrollTop = 0;
+                    // Re-highlight
+                    highlightCode();
                     break;
 
                 case 'historyCleared':
@@ -97,21 +105,45 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
             }
         });
 
+        function extractCodeTitle(code) {
+            const trimmed = code.trim();
+            const patterns = [
+                /(?:function|const|let|var)\\s+([A-Z][a-zA-Z0-9]*)\\s*[=(]/,
+                /function\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*\\(/,
+                /(?:const|let|var)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*=\\s*(?:async\\s*)?\\(/,
+                /class\\s+([A-Z][a-zA-Z0-9]*)/,
+                /(?:async\\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*\\([^)]*\\)\\s*{/,
+                /(use[A-Z][a-zA-Z]*)\\s*\\(/,
+            ];
+            for (const pattern of patterns) {
+                const match = trimmed.match(pattern);
+                if (match && match[1]) return match[1];
+            }
+            const lines = trimmed.split('\\n');
+            for (const line of lines) {
+                const cleaned = line.trim();
+                if (cleaned && !cleaned.startsWith('//') && !cleaned.startsWith('/*')) {
+                    return cleaned.slice(0, 25) + (cleaned.length > 25 ? '...' : '');
+                }
+            }
+            return 'Code snippet';
+        }
+
         function addToHistorySidebar(item) {
             const historyList = document.getElementById('historyList');
             const noHistory = historyList.querySelector('.no-history');
             if (noHistory) noHistory.remove();
 
-            const code = item.code.length > 30 ? item.code.slice(0, 30) + '...' : item.code;
-            
-            // Create element safely
+            const title = extractCodeTitle(item.code);
+            const preview = item.code.trim().split('\\n')[0].slice(0, 30);
+
             const div = document.createElement('div');
             div.className = 'history-item';
             div.dataset.id = item.id;
-            div.innerHTML = 
-                '<span class="history-lang">' + item.language + '</span>' +
-                '<span class="history-code">' + escapeHtml(code) + '</span>';
-                
+            div.innerHTML =
+                '<span class="history-lang">' + escapeHtml(title) + '</span>' +
+                '<span class="history-code">' + escapeHtml(preview) + (preview.length >= 30 ? '...' : '') + '</span>';
+
             historyList.insertAdjacentElement('afterbegin', div);
         }
 
@@ -136,6 +168,26 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
         function clearHistory() {
             vscode.postMessage({ command: 'clearHistory' });
         }
+
+        function highlightCode() {
+            const codeBlock = document.getElementById('codeBlock');
+            if (codeBlock && window.hljs) {
+                hljs.highlightElement(codeBlock);
+            }
+            // Also highlight code blocks in explanation
+            document.querySelectorAll('.explanation pre code').forEach((block) => {
+                if (!block.classList.contains('hljs')) {
+                    hljs.highlightElement(block);
+                }
+            });
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        // Highlight on load
+        document.addEventListener('DOMContentLoaded', highlightCode);
+        // Also try immediately in case DOM is already ready
+        if (document.readyState !== 'loading') highlightCode();
     </script>
 </body>
 </html>`;
