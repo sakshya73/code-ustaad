@@ -1,9 +1,9 @@
 {
-  "name": "code-ustaad",
+  "name": "code-ustaad-ai",
   "displayName": "Code Ustaad AI",
   "description": "Your AI coding mentor. Explains complex code in Hinglish (Hindi + English).",
-  "version": "1.0.2",
-  "publisher": "code-ustaad",
+  "version": "1.0.6",
+  "publisher": "sakshya73",
   "icon": "icon.png",
   "license": "MIT",
   "repository": {

@@ -1,6 +1,15 @@
-# 👨‍🏫 Code Ustaad (Code उस्ताद)
+<p align="center">
+  <img src="icon.png" alt="Code Ustaad" width="120" />
+</p>
 
-**Complex Code? Tension mat le, Ustaad hai na.**
+<h1 align="center">Code Ustaad (Code उस्ताद)</h1>
+
+<p align="center"><strong>Complex Code? Tension mat le, Ustaad hai na.</strong></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Powered%20by-Google%20Gemini-blue" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Free%20Tier-Available-brightgreen" alt="Free Tier" />
+</p>
 
 ![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/dev/assets/demo.gif?raw=true)
 <br />
@@ -26,15 +35,36 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 * **Zero Cost:** Free to use (you only pay for your API usage).
 * **Works in Cursor:** Fully compatible with Cursor AI code editor.
 
+## 🔑 How to Get Your Free API Key
+
+Code Ustaad AI works best with Google's **Gemini** model, which is **completely free** for most personal uses.
+
+### Step 1: Get the Key
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Sign in with your Google Account.
+3. Click the big blue button **"Create API key"**.
+4. Select **"Create API key in new project"**.
+5. Copy the key starting with `AIza...`.
+
+### Step 2: Add it to Code Ustaad
+1. Open VS Code.
+2. Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows) to open the Command Palette.
+3. Type and select: **`Code Ustaad: Set API Key`**.
+4. Paste your key and hit Enter.
+
+**That's it! You are ready to learn with Ustaad.**
+
+> **Note:** Your API key is stored locally on your machine and is never sent to our servers.
+
+---
+
 ## 🚀 How to Use (Kaise Use Karein)
 
-1. **Install** the extension from the VS Code Marketplace (or load locally).
-2. **Set API Key:** Run command `Code Ustaad: Set API Key` (Cmd+Shift+P → type "Set API Key").
-3. **Select Code:** Highlight any confusing function or logic block.
-4. **Ask Ustaad:**
-   - **Keyboard:** `Cmd+Shift+U` (Mac) / `Ctrl+Shift+U` (Windows/Linux)
-   - **Right-click:** Select **"Ask Ustaad"** from context menu
-5. **Learn:** Read the streaming explanation in the side panel!
+1. **Select** any piece of code in your editor.
+2. **Right-Click** and choose **"Ask Ustaad"**.
+3. (Or use the shortcut: `Cmd + Shift + U` / `Ctrl + Shift + U`).
+
+Ustaad will open a panel and explain the logic in Hinglish!
 
 ## ⚙️ Configuration
 

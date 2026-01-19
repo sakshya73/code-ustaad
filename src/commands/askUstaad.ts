@@ -44,7 +44,7 @@ export async function askUstaad(
     const editor = vscode.window.activeTextEditor;
 
     if (!editor) {
-        vscode.window.showErrorMessage("Arey beta, pehle koi file toh kholo!");
+        vscode.window.showErrorMessage("Arey bhai, pehle koi file toh kholo!");
         return;
     }
 
@@ -53,7 +53,7 @@ export async function askUstaad(
 
     if (!selectedText) {
         vscode.window.showErrorMessage(
-            "Beta, pehle code select karo jo samajhna hai!",
+            "Bhai, pehle code select karo jo samajhna hai!",
         );
         return;
     }
