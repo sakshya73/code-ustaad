@@ -270,7 +270,7 @@ export function getSetupHtml(
 
         <div class="setup-container">
             <h2>API Key Required</h2>
-            <p>Beta, pehle ${provider === "openai" ? "OpenAI" : "Gemini"} API key set karo!</p>
+            <p>Bhai, pehle ${provider === "openai" ? "OpenAI" : "Gemini"} API key set karo!</p>
             <button class="setup-btn" onclick="setupApiKey()">Set API Key</button>
             <p class="secure-note">
                 Your key is stored securely using VS Code's SecretStorage.

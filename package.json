@@ -1,9 +1,9 @@
 {
-  "name": "code-ustaad",
+  "name": "code-ustaad-ai",
   "displayName": "Code Ustaad AI",
   "description": "Your AI coding mentor. Explains complex code in Hinglish (Hindi + English).",
-  "version": "1.0.1",
-  "publisher": "code-ustaad",
+  "version": "1.0.6",
+  "publisher": "sakshya73",
   "icon": "icon.png",
   "license": "MIT",
   "repository": {
@@ -126,8 +126,9 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.js",
+    "package": "node esbuild.js --production",
     "watch": "tsc -watch -p ./",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
@@ -138,6 +139,7 @@
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.10.0",
     "@types/vscode": "^1.85.0",
+    "esbuild": "^0.27.2",
     "typescript": "^5.3.0"
   },
   "dependencies": {
