@@ -440,22 +440,4 @@ body {
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* Setup Screen */
-.setup-container {
-    text-align: center;
-    padding: 40px 20px;
-    max-width: 400px;
-    margin: 0 auto;
-}
-.setup-btn {
-    background: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 15px;
-}
-.setup-btn:hover { background: var(--vscode-button-hoverBackground); }
-.secure-note { margin-top: 20px; font-size: 11px; opacity: 0.6; }
+/* Note: Onboarding screen styles are now embedded directly in getSetupHtml() for better isolation */

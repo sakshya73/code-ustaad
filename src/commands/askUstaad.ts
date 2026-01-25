@@ -164,6 +164,57 @@ export async function askUstaad(
                         }
                         break;
                     }
+                    case "openExternalUrl": {
+                        const url = message.url;
+                        if (url) {
+                            vscode.env.openExternal(vscode.Uri.parse(url));
+                        }
+                        break;
+                    }
+                    case "saveApiKey": {
+                        const { provider: newProvider, apiKey: newApiKey } =
+                            message;
+                        if (newProvider && newApiKey) {
+                            try {
+                                const secretsService = new SecretsService(
+                                    context,
+                                );
+                                await secretsService.setApiKey(
+                                    newProvider,
+                                    newApiKey.trim(),
+                                );
+                                await ConfigService.setProvider(newProvider);
+
+                                // Send success message
+                                currentPanel?.webview.postMessage({
+                                    command: "apiKeySaved",
+                                });
+
+                                vscode.window.showInformationMessage(
+                                    "API key saved! Ab code select karo aur Ustaad se seekho!",
+                                );
+
+                                // Dispose and re-run command to show main interface
+                                if (currentPanel) {
+                                    currentPanel.dispose();
+                                    currentPanel = undefined;
+                                    setTimeout(() => {
+                                        vscode.commands.executeCommand(
+                                            "code-ustaad.askUstaad",
+                                        );
+                                    }, 100);
+                                }
+                            } catch (err: any) {
+                                currentPanel?.webview.postMessage({
+                                    command: "apiKeyError",
+                                    error:
+                                        err?.message ||
+                                        "Failed to save API key",
+                                });
+                            }
+                        }
+                        break;
+                    }
                 }
             },
             null,
@@ -177,11 +228,7 @@ export async function askUstaad(
 
     // If no API key, show setup screen
     if (!apiKey) {
-        currentPanel.webview.html = getSetupHtml(
-            styles,
-            config.provider,
-            iconUri,
-        );
+        currentPanel.webview.html = getSetupHtml(styles, iconUri);
         return;
     }
 
