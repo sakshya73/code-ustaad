@@ -273,7 +273,7 @@ export async function askUstaad(
                                 }
                             }
 
-                            contextPrompt += `Now the user asks: "${question}"\n\nPlease answer this follow-up question about the code. Be concise but helpful.`;
+                            contextPrompt += `Now the user asks: "${question}"\n\nPlease answer this follow-up question about the code. Be concise but helpful. IMPORTANT: Reply in Hinglish using ROMAN SCRIPT only (English letters), NOT Devanagari. Example: "Dekho bhai, yeh function basically..." NOT "देखो भाई, यह फंक्शन..."`;
 
                             const followupAnswer =
                                 await followupProvider.streamExplanation(

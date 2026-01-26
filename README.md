@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="icon.png" alt="Code Ustaad" width="120" />
+  <img src="icon.png" alt="Code Ustaad AI" width="120" />
 </p>
 
-<h1 align="center">Code Ustaad (Code उस्ताद)</h1>
+<h1 align="center">Code Ustaad AI (Code उस्ताद)</h1>
 
 <p align="center"><strong>Complex Code? Tension mat le, Ustaad hai na.</strong></p>
 
@@ -11,10 +11,10 @@
   <img src="https://img.shields.io/badge/Free%20Tier-Available-brightgreen" alt="Free Tier" />
 </p>
 
-![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/dev/assets/demo.gif?raw=true)
+![Code Ustaad AI Demo](https://github.com/sakshya73/code-ustaad/blob/dev/assets/demo.gif?raw=true)
 <br />
 
-Code Ustaad is a VS Code and Cursor extension designed for developers who find English technical jargon overwhelming. It explains selected code snippets in **Hinglish** (Hindi + English), acting like a wise Senior Architect sitting right next to you.
+Code Ustaad AI is a VS Code and Cursor extension designed for developers who find English technical jargon overwhelming. It explains selected code snippets in **Hinglish** (Hindi + English), acting like a wise Senior Architect sitting right next to you.
 
 It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API key (OpenAI or Gemini), keeping the extension free and open source forever.
 
@@ -153,7 +153,7 @@ Want to contribute? *Aaja maidan mein!*
     * You might have pasted the key with extra spaces.
     * *Fix:* Run `Code Ustaad: Clear API Key` and set it again carefully.
 * **History sidebar disappeared?**
-    * Click the "🕒 History" button in the top right of the Code Ustaad panel to toggle it back.
+    * Click the "🕒 History" button in the top right of the Code Ustaad AI panel to toggle it back.
 
 
 ## 🤝 Contributing
