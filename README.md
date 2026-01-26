@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="icon.png" alt="Code Ustaad" width="120" />
+  <img src="icon.png" alt="Code Ustaad AI" width="120" />
 </p>
 
-<h1 align="center">Code Ustaad (Code उस्ताद)</h1>
+<h1 align="center">Code Ustaad AI (Code उस्ताद)</h1>
 
 <p align="center"><strong>Complex Code? Tension mat le, Ustaad hai na.</strong></p>
 
@@ -11,10 +11,10 @@
   <img src="https://img.shields.io/badge/Free%20Tier-Available-brightgreen" alt="Free Tier" />
 </p>
 
-![Code Ustaad Demo](https://github.com/sakshya73/code-ustaad/blob/dev/assets/demo.gif?raw=true)
+![Code Ustaad AI Demo](https://github.com/sakshya73/code-ustaad/blob/dev/assets/demo.gif?raw=true)
 <br />
 
-Code Ustaad is a VS Code and Cursor extension designed for developers who find English technical jargon overwhelming. It explains selected code snippets in **Hinglish** (Hindi + English), acting like a wise Senior Architect sitting right next to you.
+Code Ustaad AI is a VS Code and Cursor extension designed for developers who find English technical jargon overwhelming. It explains selected code snippets in **Hinglish** (Hindi + English), acting like a wise Senior Architect sitting right next to you.
 
 It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API key (OpenAI or Gemini), keeping the extension free and open source forever.
 
@@ -22,10 +22,12 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 
 * **Hinglish Explanations:** Get explanations that feel like a chat with a senior dev. ("*Dekho bhai, scene kya hai...*")
 * **Structured Responses:** Every explanation starts with "🧐 Ek Line Mein" (TL;DR summary), followed by detailed breakdown.
+* **Ask Follow-up Questions:** Don't understand something? Ask follow-up questions directly in the panel - Ustaad remembers the context!
 * **Ustaad ka Fix:** When bugs are spotted, get copy-paste ready fixes in a dedicated code block.
 * **Syntax Highlighting:** Beautiful code highlighting powered by highlight.js - looks like VS Code!
 * **Streaming Responses:** See text appear in real-time, character by character - no more waiting!
 * **Multiple AI Providers:** Choose between OpenAI (GPT) or Google Gemini - use whichever you have access to.
+* **Easy Onboarding:** Set up your API key directly in the extension - no need to run commands or read docs!
 * **Smart History Panel:** Collapsible sidebar (🕒 button) with smart labels showing function/component names.
 * **Persona Modes:** Choose Ustaad's teaching style - Strict, Balanced, or Funny (with tech slang!)
 * **Smart Context:** Select even a single word - Ustaad grabs surrounding code for accurate explanations.
@@ -39,20 +41,20 @@ It uses the **"Bring Your Own Key" (BYOK)** model—meaning you use your own API
 
 Code Ustaad AI works best with Google's **Gemini** model, which is **completely free** for most personal uses.
 
-### Step 1: Get the Key
+### Easy Setup (Recommended)
+1. Install the extension and select any code.
+2. Press `Cmd + Shift + U` (Mac) or `Ctrl + Shift + U` (Windows/Linux).
+3. The **onboarding screen** will guide you through setup:
+   - Click **"Get Free API Key"** to open Google AI Studio.
+   - Paste your key directly in the extension.
+   - Click **"Save & Start Learning"** - done!
+
+### Manual Setup
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
 2. Sign in with your Google Account.
-3. Click the big blue button **"Create API key"**.
-4. Select **"Create API key in new project"**.
-5. Copy the key starting with `AIza...`.
-
-### Step 2: Add it to Code Ustaad
-1. Open VS Code.
-2. Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows) to open the Command Palette.
-3. Type and select: **`Code Ustaad: Set API Key`**.
-4. Paste your key and hit Enter.
-
-**That's it! You are ready to learn with Ustaad.**
+3. Click **"Create API key"** → **"Create API key in new project"**.
+4. Copy the key starting with `AIza...`.
+5. In VS Code, run command: **`Code Ustaad: Set API Key`** and paste your key.
 
 > **Note:** Your API key is stored locally on your machine and is never sent to our servers.
 
@@ -65,6 +67,13 @@ Code Ustaad AI works best with Google's **Gemini** model, which is **completely 
 3. (Or use the shortcut: `Cmd + Shift + U` / `Ctrl + Shift + U`).
 
 Ustaad will open a panel and explain the logic in Hinglish!
+
+### Ask Follow-up Questions
+
+After Ustaad explains the code, you can ask follow-up questions:
+- Type your question in the input box at the bottom of the panel.
+- Press **Enter** or click the send button.
+- Ustaad will answer while remembering the context of the code and previous conversation!
 
 ## ⚙️ Configuration
 
@@ -144,7 +153,7 @@ Want to contribute? *Aaja maidan mein!*
     * You might have pasted the key with extra spaces.
     * *Fix:* Run `Code Ustaad: Clear API Key` and set it again carefully.
 * **History sidebar disappeared?**
-    * Click the "🕒 History" button in the top right of the Code Ustaad panel to toggle it back.
+    * Click the "🕒 History" button in the top right of the Code Ustaad AI panel to toggle it back.
 
 
 ## 🤝 Contributing
