@@ -21,9 +21,19 @@ const MIN_SELECTION_LENGTH = 20;
 const CONTEXT_LINES = 10;
 const LARGE_SELECTION_THRESHOLD = 100;
 const VERY_LARGE_SELECTION_THRESHOLD = 300;
+const MAX_FOLLOWUPS_IN_CONTEXT = 5; // Sliding window for follow-up context
 
 let currentPanel: vscode.WebviewPanel | undefined;
 let styles: string = "";
+
+// Conversation context for follow-up questions
+interface ConversationContext {
+    code: string;
+    language: string;
+    explanation: string;
+    followups: Array<{ question: string; answer: string }>;
+}
+let conversationContext: ConversationContext | null = null;
 
 export function setStyles(css: string): void {
     styles = css;
@@ -215,6 +225,86 @@ export async function askUstaad(
                         }
                         break;
                     }
+                    case "askFollowup": {
+                        const question = message.question;
+                        if (!question || !conversationContext) {
+                            currentPanel?.webview.postMessage({
+                                command: "followupError",
+                                error: "No context available for follow-up.",
+                            });
+                            break;
+                        }
+
+                        const cfg = ConfigService.get();
+                        const secretsSvc = new SecretsService(context);
+                        const key = await secretsSvc.getApiKey(cfg.provider);
+
+                        if (!key) {
+                            currentPanel?.webview.postMessage({
+                                command: "followupError",
+                                error: "API key not found.",
+                            });
+                            break;
+                        }
+
+                        try {
+                            const followupProvider = createProvider(
+                                cfg.provider,
+                                key,
+                                ConfigService.getModel(cfg.provider),
+                            );
+
+                            const systemPrompt =
+                                PERSONA_PROMPTS[cfg.personaIntensity] ||
+                                PERSONA_PROMPTS.balanced;
+
+                            // Build context-aware prompt
+                            let contextPrompt = `You previously explained this ${conversationContext.language} code:\n\n\`\`\`${conversationContext.language}\n${conversationContext.code}\n\`\`\`\n\nYour explanation was:\n${conversationContext.explanation}\n\n`;
+
+                            // Add recent follow-ups for context (sliding window)
+                            if (conversationContext.followups.length > 0) {
+                                const recentFollowups =
+                                    conversationContext.followups.slice(
+                                        -MAX_FOLLOWUPS_IN_CONTEXT,
+                                    );
+                                contextPrompt += "Recent follow-up Q&A:\n";
+                                for (const fu of recentFollowups) {
+                                    contextPrompt += `Q: ${fu.question}\nA: ${fu.answer}\n\n`;
+                                }
+                            }
+
+                            contextPrompt += `Now the user asks: "${question}"\n\nPlease answer this follow-up question about the code. Be concise but helpful.`;
+
+                            const followupAnswer =
+                                await followupProvider.streamExplanation(
+                                    systemPrompt,
+                                    contextPrompt,
+                                    (content) => {
+                                        currentPanel?.webview.postMessage({
+                                            command: "followupStreamUpdate",
+                                            content: renderMarkdown(content),
+                                        });
+                                    },
+                                );
+
+                            // Store in conversation context
+                            conversationContext.followups.push({
+                                question,
+                                answer: followupAnswer,
+                            });
+
+                            currentPanel?.webview.postMessage({
+                                command: "followupStreamComplete",
+                            });
+                        } catch (err: any) {
+                            const errMsg = handleApiError(err, cfg.provider);
+                            currentPanel?.webview.postMessage({
+                                command: "followupError",
+                                error: errMsg,
+                            });
+                        }
+                        break;
+                    }
                 }
             },
             null,
@@ -284,6 +374,14 @@ export async function askUstaad(
                 });
             },
         );
+
+        // Store conversation context for follow-up questions
+        conversationContext = {
+            code: codeToExplain,
+            language: languageId,
+            explanation: fullExplanation,
+            followups: [],
+        };
 
         // Save to history
         const newItem: HistoryItem = {

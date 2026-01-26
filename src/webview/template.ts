@@ -28,6 +28,89 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
     <title>Code Ustaad</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <style>${styles}</style>
+    <style>
+        /* Follow-up Chat Input - embedded for reliability */
+        .followup-container {
+            padding: 12px 20px 20px 20px;
+            border-top: 1px solid var(--vscode-panel-border, #454545);
+            background: var(--vscode-editor-background);
+            flex-shrink: 0;
+            display: none;
+        }
+        .followup-container.visible {
+            display: block;
+        }
+        .followup-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .followup-input {
+            flex: 1;
+            background: var(--vscode-input-background, #3c3c3c);
+            border: 1px solid var(--vscode-input-border, #3c3c3c);
+            color: var(--vscode-input-foreground, #d4d4d4);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: var(--vscode-font-family, system-ui);
+        }
+        .followup-input:focus {
+            outline: none;
+            border-color: var(--vscode-focusBorder, #007fd4);
+        }
+        .followup-input::placeholder {
+            color: var(--vscode-input-placeholderForeground, #888);
+        }
+        .followup-input:disabled {
+            opacity: 0.6;
+        }
+        .followup-btn {
+            width: 38px;
+            height: 38px;
+            background: var(--vscode-button-background, #0e639c);
+            color: var(--vscode-button-foreground, #fff);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .followup-btn:hover:not(:disabled) {
+            background: var(--vscode-button-hoverBackground, #1177bb);
+        }
+        .followup-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .followup-question {
+            margin-top: 20px;
+            padding: 12px 14px;
+            background: rgba(55, 148, 255, 0.1);
+            border-left: 3px solid var(--vscode-textLink-foreground, #3794ff);
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+        }
+        .followup-response {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--vscode-panel-border, #454545);
+        }
+        /* Layout fix for scrolling */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .section.explanation-section {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="main-content">
@@ -45,7 +128,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
             <pre class="code-block"><code class="language-${language}" id="codeBlock">${escapedCode}</code></pre>
         </div>
 
-        <div class="section">
+        <div class="section explanation-section">
             <div class="section-title">Ustaad's Explanation</div>
             <div class="explanation" id="explanation">
                 ${
@@ -56,6 +139,23 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                         </div>`
                         : ""
                 }
+            </div>
+        </div>
+
+        <div class="followup-container" id="followupContainer">
+            <div class="followup-input-wrapper">
+                <input
+                    type="text"
+                    id="followupInput"
+                    class="followup-input"
+                    placeholder="Ask a follow-up question..."
+                    autocomplete="off"
+                />
+                <button class="followup-btn" id="followupBtn" onclick="sendFollowup()" title="Send">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -75,6 +175,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 
     <script>
         const vscode = acquireVsCodeApi();
+        let isStreaming = false;
 
         window.addEventListener('message', event => {
             const message = event.data;
@@ -96,10 +197,13 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     // Highlight code blocks and add copy buttons
                     highlightCode();
                     addCopyButtons();
+                    // Enable follow-up input
+                    setFollowupEnabled(true);
                     break;
 
                 case 'streamError':
                     explanation.innerHTML = '<div class="error">' + message.error + '</div>';
+                    setFollowupEnabled(true);
                     break;
 
                 case 'showHistoryItem':
@@ -113,11 +217,105 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
                     // Re-highlight and add copy buttons
                     highlightCode();
                     addCopyButtons();
+                    // Disable follow-up for history items (no context)
+                    setFollowupEnabled(false);
                     break;
 
                 case 'historyCleared':
                     document.getElementById('historyList').innerHTML = '<div class="no-history">No history yet</div>';
                     break;
+
+                case 'followupStreamUpdate':
+                    // Append follow-up response to existing explanation
+                    let followupDiv = document.getElementById('followupResponse');
+                    if (!followupDiv) {
+                        followupDiv = document.createElement('div');
+                        followupDiv.id = 'followupResponse';
+                        followupDiv.className = 'followup-response';
+                        explanation.appendChild(followupDiv);
+                    }
+                    followupDiv.innerHTML = '<div class="streaming-content streaming-cursor">' + message.content + '</div>';
+                    explanation.parentElement.scrollTop = explanation.parentElement.scrollHeight;
+                    break;
+
+                case 'followupStreamComplete':
+                    const followupContentDiv = document.querySelector('#followupResponse .streaming-content');
+                    if (followupContentDiv) followupContentDiv.classList.remove('streaming-cursor');
+                    highlightCode();
+                    addCopyButtons();
+                    isStreaming = false;
+                    setFollowupEnabled(true);
+                    break;
+
+                case 'followupError':
+                    let errorDiv = document.getElementById('followupResponse');
+                    if (!errorDiv) {
+                        errorDiv = document.createElement('div');
+                        errorDiv.id = 'followupResponse';
+                        errorDiv.className = 'followup-response';
+                        explanation.appendChild(errorDiv);
+                    }
+                    errorDiv.innerHTML = '<div class="error">' + message.error + '</div>';
+                    isStreaming = false;
+                    setFollowupEnabled(true);
+                    break;
+            }
+        });
+
+        function setFollowupEnabled(enabled) {
+            const input = document.getElementById('followupInput');
+            const btn = document.getElementById('followupBtn');
+            const container = document.getElementById('followupContainer');
+
+            if (enabled && !isStreaming) {
+                container.classList.add('visible');
+                input.disabled = false;
+                btn.disabled = false;
+                input.placeholder = 'Ask a follow-up question...';
+            } else if (isStreaming) {
+                container.classList.add('visible');
+                input.disabled = true;
+                btn.disabled = true;
+                input.placeholder = 'Ustaad soch rahe hain...';
+            } else {
+                container.classList.remove('visible');
+            }
+        }
+
+        function sendFollowup() {
+            const input = document.getElementById('followupInput');
+            const question = input.value.trim();
+
+            if (!question || isStreaming) return;
+
+            // Clear previous follow-up response
+            const prevResponse = document.getElementById('followupResponse');
+            if (prevResponse) prevResponse.remove();
+
+            // Add user's question to the UI
+            const explanation = document.getElementById('explanation');
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'followup-question';
+            questionDiv.innerHTML = '<strong>You:</strong> ' + escapeHtml(question);
+            explanation.appendChild(questionDiv);
+
+            // Scroll to show the question
+            explanation.parentElement.scrollTop = explanation.parentElement.scrollHeight;
+
+            // Send to backend
+            isStreaming = true;
+            setFollowupEnabled(false);
+            vscode.postMessage({ command: 'askFollowup', question: question });
+
+            // Clear input
+            input.value = '';
+        }
+
+        // Handle Enter key for follow-up
+        document.getElementById('followupInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendFollowup();
             }
         });
 
@@ -244,7 +442,7 @@ export function getWebviewHtml(params: WebviewTemplateParams): string {
 </html>`;
 }
 
-export function getSetupHtml(styles: string, iconUri: string): string {
+export function getSetupHtml(_styles: string, iconUri: string): string {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>

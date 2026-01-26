@@ -223,14 +223,14 @@ body {
 
 .section {
     padding: 15px 20px;
-    flex-shrink: 0; /* Code block section shouldn't shrink too much */
+    flex-shrink: 0;
 }
 
-.section:last-child {
-    flex: 1; /* Explanation takes remaining height */
-    overflow-y: auto; /* Scrollable explanation */
-    min-height: 200px;
-    padding-bottom: 40px;
+.section.explanation-section {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0; /* Important for flex child scrolling */
+    padding-bottom: 20px;
 }
 
 .section-title {
@@ -441,3 +441,98 @@ body {
 @keyframes blink { 50% { opacity: 0; } }
 
 /* Note: Onboarding screen styles are now embedded directly in getSetupHtml() for better isolation */
+
+/* --- Follow-up Chat Input --- */
+.followup-container {
+    padding: 12px 20px 20px 20px;
+    border-top: 1px solid var(--vscode-panel-border, #454545);
+    background: var(--vscode-editor-background);
+    flex-shrink: 0;
+    display: none;
+}
+
+.followup-container.visible {
+    display: block;
+}
+
+.followup-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.followup-input {
+    flex: 1;
+    background: var(--vscode-input-background, #3c3c3c);
+    border: 1px solid var(--vscode-input-border, #3c3c3c);
+    color: var(--vscode-input-foreground, #d4d4d4);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: var(--vscode-font-family, system-ui);
+    transition: border-color 0.2s ease;
+}
+
+.followup-input:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder, #007fd4);
+}
+
+.followup-input::placeholder {
+    color: var(--vscode-input-placeholderForeground, #888);
+}
+
+.followup-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.followup-btn {
+    width: 38px;
+    height: 38px;
+    background: var(--vscode-button-background, #0e639c);
+    color: var(--vscode-button-foreground, #fff);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.followup-btn:hover:not(:disabled) {
+    background: var(--vscode-button-hoverBackground, #1177bb);
+}
+
+.followup-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.followup-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Follow-up Question Display */
+.followup-question {
+    margin-top: 20px;
+    padding: 12px 14px;
+    background: rgba(55, 148, 255, 0.1);
+    border-left: 3px solid var(--vscode-textLink-foreground, #3794ff);
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+}
+
+.followup-question strong {
+    color: var(--vscode-textLink-foreground, #3794ff);
+}
+
+/* Follow-up Response */
+.followup-response {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--vscode-panel-border, #454545);
+}
